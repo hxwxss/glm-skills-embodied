@@ -88,7 +88,7 @@ reconstructible. LeRobot/RLDS conversion is a straightforward next step.
 ├── skills/agentic-sim2data/   ★ the skill (SKILL.md + 18-entry pitfalls reference)
 ├── videos/grasp_demo_hd.mp4   demo video
 ├── data/demo.hdf5             dataset (6 episodes, 53 MB)
-├── images/                    MuJoCo demo frames + Blender (M0) three-camera renders
+├── images/                    demo frames (what you see in the video)
 ├── pipeline/
 │  ├── blender/               scene builder + interactive panel + .blend
 │  ├── spec/scene_spec.json   ★ the IR contract (single source of truth)
