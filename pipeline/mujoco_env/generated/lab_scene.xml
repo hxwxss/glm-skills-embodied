@@ -1,0 +1,53 @@
+<mujoco model="embodied_lab_tabletop">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <visual>
+    <headlight ambient="0.45 0.45 0.5" diffuse="0.65 0.65 0.7" specular="0.15 0.15 0.15"/>
+  </visual>
+  <statistic center="0.1 0 0.55" meansize="0.04" extent="2.66"/>
+  <asset>
+    <texture name="floor_tex" type="2d" builtin="checker" rgb1="0.26 0.27 0.29" rgb2="0.33 0.34 0.36" width="512" height="512"/>
+    <material name="floor_mat" texture="floor_tex" texrepeat="6 6" reflectance="0.12" shininess="0.4"/>
+  </asset>
+  <worldbody>
+    <light name="key_light" directional="true" pos="0 -1.2 2.4" dir="0.25 0.35 -0.9" diffuse="0.85 0.85 0.88"/>
+    <light name="fill_light" directional="true" pos="-1.5 -1.5 1.8" dir="0.6 0.6 -0.5" diffuse="0.35 0.36 0.42"/>
+    <geom name="room_floor" type="plane" size="5 5 0.05" pos="0 0 0.0" material="floor_mat"/>
+    <!-- 实验桌：顶面高度 0.750m -->
+    <geom name="table_top" type="box" pos="0 0 0.7275" size="0.9500 0.4750 0.0225" rgba="0.200 0.210 0.230 1" friction="0.6 0.008 0.0002"/>
+    <geom name="table_leg_0" type="cylinder" pos="-0.8600 -0.3850 0.3525" size="0.0210 0.3525" rgba="0.09 0.095 0.105 1"/>
+    <geom name="table_leg_1" type="cylinder" pos="0.8600 -0.3850 0.3525" size="0.0210 0.3525" rgba="0.09 0.095 0.105 1"/>
+    <geom name="table_leg_2" type="cylinder" pos="-0.8600 0.3850 0.3525" size="0.0210 0.3525" rgba="0.09 0.095 0.105 1"/>
+    <geom name="table_leg_3" type="cylinder" pos="0.8600 0.3850 0.3525" size="0.0210 0.3525" rgba="0.09 0.095 0.105 1"/>
+    <geom name="Sample_Plinth" type="box" pos="0.080000 0.060000 0.765000" size="0.045000 0.045000 0.015000" rgba="0.130 0.140 0.160 1.0"/>
+    <!-- Storage_Box -->
+    <body name="Storage_Box" pos="0.400000 0.120000 0.750000">
+      <geom name="Storage_Box_wall0" type="box" pos="0.000000 -0.095000 0.084500" size="0.135000 0.006000 0.072500" rgba="0.860 0.950 0.970 0.45"/>
+      <geom name="Storage_Box_wall1" type="box" pos="0.000000 0.095000 0.084500" size="0.135000 0.006000 0.072500" rgba="0.860 0.950 0.970 0.45"/>
+      <geom name="Storage_Box_wall2" type="box" pos="-0.135000 0.000000 0.084500" size="0.006000 0.083000 0.072500" rgba="0.860 0.950 0.970 0.45"/>
+      <geom name="Storage_Box_wall3" type="box" pos="0.135000 0.000000 0.084500" size="0.006000 0.083000 0.072500" rgba="0.860 0.950 0.970 0.45"/>
+      <geom name="Storage_Box_bottom" type="box" pos="0.000000 0.000000 0.006000" size="0.135000 0.095000 0.006000" rgba="0.860 0.950 0.970 0.45"/>
+    </body>
+    <geom name="Control_Panel_Deck" type="box" pos="-0.380000 -0.300000 0.825000" quat="0.99377 -0.08693 -0.00608 0.06948" size="0.100000 0.065000 0.011000" rgba="0.100 0.110 0.125 1.0"/>
+    <geom name="Desk_Lamp_Base" type="cylinder" pos="-0.780000 0.260000 0.762000" size="0.085000 0.012000" rgba="0.550 0.560 0.580 1.0"/>
+    <!-- 任务目标区：PutRedInBox -->
+    <site name="goal_zone" type="box" pos="0.4000 0.1200 0.7940" size="0.1170 0.0770 0.0665" rgba="0.15 1.0 0.3 0.08" group="3"/>
+    <geom name="goal_zone_vis" type="box" pos="0.4000 0.1200 0.7940" size="0.1170 0.0770 0.0665" rgba="0.15 0.9 0.25 0.10" contype="0" conaffinity="0" group="2"/>
+    <body name="Prop_Cube_Red" pos="0.080000 0.060000 0.805500" quat="0.994524 0.000000 0.000000 0.104509">
+      <freejoint name="Prop_Cube_Red_free"/>
+      <geom name="Prop_Cube_Red" type="box" size="0.025000 0.025000 0.025000" mass="0.060" rgba="0.820 0.035 0.030 1.0" friction="0.7 0.01 0.0005" condim="4"/>
+      <!-- dims: half=[0.025, 0.025, 0.025] | semantic: grasp_target -->
+    </body>
+    <body name="Prop_Cylinder_Blue" pos="-0.040000 0.180000 0.825500">
+      <freejoint name="Prop_Cylinder_Blue_free"/>
+      <geom name="Prop_Cylinder_Blue" type="cylinder" size="0.050000 0.075000" mass="0.180" rgba="0.035 0.130 0.800 1.0" friction="0.7 0.01 0.0005" condim="4"/>
+      <!-- dims: r=0.05 h=0.15 | semantic: distractor -->
+    </body>
+    <body name="Prop_Sphere_Yellow" pos="-0.120000 0.260000 0.805500">
+      <freejoint name="Prop_Sphere_Yellow_free"/>
+      <geom name="Prop_Sphere_Yellow" type="sphere" size="0.055000" mass="0.100" rgba="0.920 0.720 0.040 1.0" friction="0.7 0.01 0.0005" condim="4"/>
+      <!-- dims: r=0.055 | semantic: distractor -->
+    </body>
+  </worldbody>
+  <actuator/>
+</mujoco>
