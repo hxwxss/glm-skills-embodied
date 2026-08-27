@@ -4,9 +4,9 @@
 
 We asked GLM-5.3-Flash to do embodied-AI data engineering end to end: design the scene in Blender, export a scene-spec IR, compile it to MuJoCo, pass physics / reachability / penetration validation gates, write its own IK expert, and produce a LIBERO-style HDF5 dataset — autonomously.
 
-https://github.com/user-attachments/assets/<video-id>
+![Grasp demo video](videos/grasp_demo_hd.mp4)
 
-*If the embed above does not play in your GitHub view, click [`videos/grasp_demo_hd.mp4`](videos/grasp_demo_hd.mp4).*
+*Click the player above to watch. Fallback: [`videos/grasp_demo_hd.mp4`](videos/grasp_demo_hd.mp4)*
 
 ## The demo
 
