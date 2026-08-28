@@ -30,8 +30,10 @@ One command reruns the whole methodology on this task:
 | [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | ![lid open](images/lid_open.gif) |
 | [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | ![two tier sort](images/two_tier_sort.gif) |
 
-*Single-episode tasks are preview builds — the policies and validation gates
-are complete, dataset scaling is in progress.*
+*`lid_open` and `two_tier_sort` are preview builds — validation gates and
+policies are complete; dataset scaling and long-horizon tuning are in
+progress (the two-tier expert now records every motion phase after the
+contact-callback fix).*
 
 
 ## Pipeline
