@@ -1,4 +1,13 @@
-const videos = [
+c
+    }, {
+      title: "Bottle in tray",
+      source: "../../tasks/bottle_tray/rollouts/bottle_in_tray_demo.mp4"
+    }, {
+      title: "Flip open the lid",
+      source: "../../tasks/lid_open/rollouts/lid_open_demo.mp4"
+    }, {
+      title: "Two-tier sort (long horizon)",
+      source: "../../tasks/two_tier_sort/rollouts/two_tier_demo.mp4"onst videos = [
   {
     title: "Grasp demo",
     description: "The original 640 x 480 robot manipulation recording included with the project.",

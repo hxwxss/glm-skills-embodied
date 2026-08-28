@@ -11,9 +11,10 @@ venv/
 .env.*
 !.env.example
 
-# Runtime artifacts
-renders/
+# Runtime artifacts (repo root only; task renders are tracked)
+/renders/
 *.log
+*.blend1
 
 # OS/editor metadata
 .DS_Store
