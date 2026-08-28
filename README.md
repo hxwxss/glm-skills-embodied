@@ -9,11 +9,37 @@ The reference task is: **put the red cube into the transparent storage box**.
 The project is intentionally small enough to inspect, rerun, and adapt to a
 new scene.
 
+![Grasp demo teaser](images/demo_hd_frames.png)
+
 ## Demo / Videos
 
-The repository includes three H.264/MP4 recordings. GitHub README pages do not
-reliably inline-play local MP4 files, so use the static gallery for native
-browser playback:
+The repository includes three H.264/MP4 recordings. The teaser above gives a
+quick visual overview; the players below expose the recordings directly on
+this page where the GitHub renderer supports HTML5 video.
+
+### Grasp demo
+
+<video controls preload="metadata" playsinline width="640" poster="images/demo_hd_frames.png">
+  <source src="videos/grasp_demo_hd.mp4" type="video/mp4">
+  <a href="videos/grasp_demo_hd.mp4">Download or open the grasp demo</a>
+</video>
+
+### Supplementary video 01
+
+<video controls preload="metadata" playsinline width="640">
+  <source src="videos/supplementary_demo_01.mp4" type="video/mp4">
+  <a href="videos/supplementary_demo_01.mp4">Download or open supplementary video 01</a>
+</video>
+
+### Supplementary video 02
+
+<video controls preload="metadata" playsinline width="640">
+  <source src="videos/supplementary_demo_02.mp4" type="video/mp4">
+  <a href="videos/supplementary_demo_02.mp4">Download or open supplementary video 02</a>
+</video>
+
+If GitHub's Markdown sanitizer does not render the native players in your
+browser, use the static gallery instead:
 
 **[Open the video gallery](frontend/index.html)**
 
