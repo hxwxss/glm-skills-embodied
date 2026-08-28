@@ -11,7 +11,7 @@ sorts: **red cube → upper compartment, blue cube → drawer**.
 | artifact | path |
 | --- | --- |
 | one successful demonstration (video) | `rollouts/two_tier_demo.mp4` (side-by-side agentview+sideview, 640×480 @20 fps) |
-| LIBERO/robosuite-style dataset | `demos/demo.hdf5` (readback-verified) |
+| LIBERO/robosuite-style dataset | `../../data/two_tier_sort/demo.hdf5` (readback-verified) |
 | scene IR (single source of truth) | `spec/scene_spec.json` |
 | compiled standalone MJCF | `mujoco_env/generated/tier_scene.xml` |
 | render receipts / debug frames | `renders/` |
@@ -84,7 +84,7 @@ drawer → settle.  Key structural choices that the gates forced:
    descent (found by the M3.5 audit: a blind retry pressed the hand into
    the cube, 9 mm).
 
-## Dataset schema (`demos/demo.hdf5`)
+## Dataset schema (`../../data/two_tier_sort/demo.hdf5`)
 
 ```
 attrs: spec_snapshot (full IR), success_rate, instruction

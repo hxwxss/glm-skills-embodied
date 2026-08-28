@@ -23,6 +23,8 @@ import json
 import math
 import argparse
 
+import sys
+
 import numpy as np
 
 from robosuite.environments.manipulation.manipulation_env import ManipulationEnv
@@ -447,3 +449,5 @@ if __name__ == "__main__":
                         env.red_xy_jitter + 1e-6 for k in (0, 1))
         print("[%s] success stays False at init" % ("ok" if n_success_false_ok else "FAIL"))
         print("[%s] jitter bounds respected" % ("ok" if ok_bounds else "FAIL"))
+        if not (n_success_false_ok and ok_bounds):
+            sys.exit(1)

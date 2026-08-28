@@ -25,6 +25,8 @@ import json
 import math
 import os
 
+import sys
+
 import numpy as np
 import xml.etree.ElementTree as ET
 
@@ -311,3 +313,7 @@ if __name__ == "__main__":
         print("[%s] jitter span within +-2*jitter (+1mm tol): span=%s vs %s"
               % ("ok" if np.all(span <= 2 * env.box_jitter + 1e-3) else "FAIL",
                  np.round(span, 4).tolist(), 2 * env.box_jitter))
+        gates_ok = (init_success_ok and lid_closed_ok and
+                    bool(np.all(span <= 2 * env.box_jitter + 1e-3)))
+        if not gates_ok:
+            sys.exit(1)

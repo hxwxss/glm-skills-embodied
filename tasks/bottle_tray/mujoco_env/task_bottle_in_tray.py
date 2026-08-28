@@ -25,6 +25,8 @@ import math
 import argparse
 
 import mujoco
+import sys
+
 import numpy as np
 
 from robosuite.environments.manipulation.manipulation_env import ManipulationEnv
@@ -495,6 +497,8 @@ if __name__ == "__main__":
         print("[%s] objects rest on surfaces" % ("ok" if on_surface_ok else "FAIL"))
         print("[%s] jitter bounds respected" % ("ok" if j_ok else "FAIL"))
         print("[%s] no bottle/tray initial overlap" % ("ok" if sep_ok else "FAIL"))
+        if not (success_false_ok and on_surface_ok and j_ok and sep_ok):
+            sys.exit(1)
         if not (success_false_ok and on_surface_ok and j_ok and sep_ok):
             sys.exit(1)
         print("RESET_TEST_OK")

@@ -15,7 +15,7 @@ run_pipeline.py — agentic scene-to-data pipeline, one-command end-to-end
 
 Usage:
     python run_pipeline.py                # full pipeline
-    python run_pipeline.py --skip-blender # reuse existing .blend/spec
+    python run_pipeline.py                # scene IR ships with the repo
 Exit 0 only if every stage passes.
 """
 
@@ -28,7 +28,8 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 PYTHON = sys.executable
 # Blender location: PATH lookup first, override with BLENDER_EXE env var
-BLENDER = os.environ.get("BLENDER_EXE") or shutil.which("blender")
+# Blender exe is resolved by the authoring project; not needed here
+# BLENDER = os.environ.get("BLENDER_EXE") or shutil.which("blender")
 
 
 def run(name, cmd):
@@ -42,19 +43,12 @@ def run(name, cmd):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--skip-renders", action="store_true")
     ap.add_argument("--episodes", type=int, default=8)
     args = ap.parse_args()
 
     ok = True
-    if not args.skip_blender:
-        build_args = [BLENDER, "--background", "--factory-startup",
-                      "--python", os.path.join(HERE, "..",
-                                               "build_scene_bottle.py")]
-        if args.skip_renders:
-            build_args += ["--", "--skip-render"]
-        ok &= run("1. Blender scene build + IR dump", build_args)
-
+    # scene IR ships with the repo (spec/); rerun the Blender authoring stage
+    # separately with: blender --python ../build_scene_bottle.py
     ok &= run("2. MJCF compile", [PYTHON, os.path.join(HERE, "compile_mjcf.py")])
     ok &= run("3. Physics settle self-check",
               [PYTHON, os.path.join(HERE, "test_mjcf_physics.py")])

@@ -1,0 +1,10 @@
+# Python 3.12; MuJoCo pipeline (headless-safe)
+mujoco==3.4.0
+robosuite==1.5.2
+robosuite-models==1.0.0
+mink==0.0.5
+h5py==3.11.0
+imageio
+numpy<3
+opencv-python
+Pillow

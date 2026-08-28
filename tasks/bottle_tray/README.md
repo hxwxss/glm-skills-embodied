@@ -56,7 +56,7 @@ mujoco_env/
   collect_demos.py             M4 HDF5 + MP4
   verify_dataset.py            M4 read-back shape verification
   run_pipeline.py              ★ end-to-end
-demos/bottle_tray_demo.hdf5    8 episodes, 100 % success
+../../data/bottle_tray/bottle_tray_demo.hdf5    8 episodes, 100 % success
 rollouts/bottle_in_tray_demo.mp4
 renders/                       M0 receipts, settle receipt, dataset frames
 ```

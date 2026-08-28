@@ -25,6 +25,8 @@ import json
 import os
 
 import h5py
+import sys
+
 import numpy as np
 
 from expert_ik import IKExpert, make_env
@@ -119,6 +121,13 @@ def collect(episodes, out_path, camera=True):
         print(f"[episode {ep}] success={success} steps={jsteps} "
               f"transitions={len(frames['dones'])}")
 
+    failures = [ep for ep in episodes_data if not ep["success"]]
+    if failures:
+        print(f"[collect] {len(failures)} failed episodes NOT written to the dataset")
+    episodes_data = [ep for ep in episodes_data if ep["success"]]
+    if not episodes_data:
+        print("[collect] no successful episodes — aborting without writing data")
+        sys.exit(1)
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with h5py.File(out_path, "w") as f:
         f.attrs["spec_snapshot"] = json.dumps(env.spec)
@@ -141,6 +150,8 @@ def collect(episodes, out_path, camera=True):
             meta.attrs["env_name"] = "PutRedInBox"
             meta.attrs["spec_json"] = json.dumps(env.spec)
     print(f"WROTE {out_path}  success_rate={wins}/{episodes}")
+    if wins < episodes:
+        sys.exit(1)
     env.close()
 
 

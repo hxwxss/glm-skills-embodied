@@ -529,8 +529,8 @@ class IKExpert:
         return self.gripper_spread() >= min_spread_m
 
     # ------------------------------------------------------------------
-    def _track(self, env, q_arm, gripper, record_hook=None, tol=0.03,
-               settle_steps=15, cap=WP_STEP_CAP):
+    def _track(self, env, q_arm, gripper, record_hook=None, step_cb=None,
+               tol=0.03, settle_steps=15, cap=WP_STEP_CAP):
         """Step joint targets toward q_arm; done only after the controller
         has HELD within tol for `settle_steps` consecutive steps."""
         held = 0
@@ -541,6 +541,8 @@ class IKExpert:
             a[:7] = qa + np.clip(q_arm - qa, -DQ_MAX, DQ_MAX)
             a[7] = float(gripper)
             obs, _, done, _ = env.step(a)
+            if step_cb is not None:
+                step_cb(a, obs)
             jsteps += 1
             if record_hook is not None:
                 record_hook(jsteps, obs)
@@ -606,6 +608,7 @@ class IKExpert:
                                   % (wp["note"], perr, rerr))
                         done, n = self._track(env, q_arm, wp["gripper"],
                                               record_hook=record_hook,
+                                              step_cb=step_cb,
                                               tol=wp.get("tol", 0.03))
                         jsteps += n
                         if verbose:

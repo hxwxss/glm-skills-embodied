@@ -14,18 +14,6 @@ c
     source: "../videos/grasp_demo_hd.mp4",
     meta: "640 x 480 · H.264 MP4"
   },
-  {
-    title: "Supplementary video 01",
-    description: "Additional project recording supplied alongside the repository assets.",
-    source: "../videos/supplementary_demo_01.mp4",
-    meta: "640 x 480 · H.264 MP4"
-  },
-  {
-    title: "Supplementary video 02",
-    description: "Additional wide-format project recording supplied alongside the repository assets.",
-    source: "../videos/supplementary_demo_02.mp4",
-    meta: "1280 x 480 · H.264 MP4"
-  }
 ];
 
 const grid = document.querySelector("#video-grid");

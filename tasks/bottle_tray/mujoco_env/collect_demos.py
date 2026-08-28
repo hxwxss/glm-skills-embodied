@@ -144,6 +144,13 @@ def collect(episodes, out_path, video_path):
             ren_vid.close()
 
     good = [e for e in episodes_data if e["success"]]
+    failures = [ep for ep in episodes_data if not ep["success"]]
+    if failures:
+        print(f"[collect] {len(failures)} failed episodes NOT written to the dataset")
+    episodes_data = [ep for ep in episodes_data if ep["success"]]
+    if not episodes_data:
+        print("[collect] no successful episodes — aborting without writing data")
+        sys.exit(1)
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with h5py.File(out_path, "w") as f:
         f.attrs["spec_snapshot"] = json.dumps(env.spec)

@@ -137,7 +137,9 @@ human review.
 
 ## Reference implementation
 
-The checked-in `pipeline/` directory is the working reference
+The checked-in `pipeline/` directory of this repository is the working
+reference (copying the skill alone does not carry the pipeline — clone the
+repo)
 (`compile_mjcf.py`, `task_put_red_in_box.py`, `expert_ik.py`,
 `collect_demos.py`, `test_penetration.py`, and `run_pipeline.py`). Reuse its
 structure and constants as a starting point; adapt names, layout, and robot to

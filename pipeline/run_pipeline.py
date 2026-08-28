@@ -64,8 +64,17 @@ def main():
           "--episodes", str(args.collect_episodes),
           "--out", os.path.join(HERE, "..", "data", "demo.hdf5")]),
     ]
-    for name, cmd in stages:
+    xml = os.path.join(HERE, "generated", "lab_scene.xml")
+    for i, (name, cmd) in enumerate(stages):
+        if i == 0:
+            # drop the stale compiled scene so a failed compile can never
+            # leave an old world for the later gates to validate
+            if os.path.exists(xml):
+                os.remove(xml)
         ok &= run(name, cmd)
+        if not ok:
+            print(f"[fail-fast] stopping at '{name}'")
+            break
 
     print("\n" + "=" * 66)
     print("PIPELINE_RESULT:", "ALL_OK" if ok else "FAILED")

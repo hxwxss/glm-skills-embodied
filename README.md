@@ -68,7 +68,7 @@ by a full pipeline rerun:
 | 7 | Camera composition | featureless white table read as a wall — scene looked upside down | near-vertical top-down camera + checkerboard table texture |
 
 
-## Dataset
+## Dataset & requirements
 
 Every task ships its own HDF5 in LIBERO/robosuite-compatible schema
 (see [`data/demo.hdf5`](data/demo.hdf5)):
