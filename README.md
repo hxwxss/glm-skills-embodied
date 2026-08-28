@@ -3,22 +3,16 @@
 **One coding-agent skill that turns natural-language manipulation tasks into
 physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
 
-GLM-5.3-Flash designed each scene, passed physics / reachability / penetration
-validation gates, wrote its own IK expert policies, and collected the datasets
-below — with zero hand-fixes.
 
-![Grasp demo](images/grasp_demo.gif)
-
-▶ Full video: [`videos/grasp_demo_hd.mp4`](videos/grasp_demo_hd.mp4)
 
 ## Tasks
 
-| Task | Instruction | Joint type | Episodes | Success | |
-|---|---|---|---|---|---|
-| [`pipeline/` put-red-in-box](pipeline/) | put the red cube into the transparent storage box | — (free objects) | 6 | **100%** | ![put in box](images/grasp_demo.gif) |
-| [`tasks/bottle_tray`](tasks/bottle_tray/) | put the green bottle in the tray | — (novel objects: bottle + tray) | 8 | **100%** | ![bottle in tray](images/bottle_tray.gif) |
-| [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | 1 *(preview)* | **100%** | ![lid open](images/lid_open.gif) |
-| [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | 1 *(preview)* | **100%** | ![two tier sort](images/two_tier_sort.gif) |
+| Task | Instruction | Joint type | Success | |
+|---|---|---|---|---|
+| [`pipeline/` put-red-in-box](pipeline/) | put the red cube into the transparent storage box | — (free objects) | **100%** | ![put in box](images/grasp_demo.gif) |
+| [`tasks/bottle_tray`](tasks/bottle_tray/) | put the green bottle in the tray | — (novel objects: bottle + tray) | **100%** | ![bottle in tray](images/bottle_tray.gif) |
+| [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | **100%** | ![lid open](images/lid_open.gif) |
+| [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | **100%** | ![two tier sort](images/two_tier_sort.gif) |
 
 *Single-episode tasks are preview builds — the policies and validation gates
 are complete, dataset scaling is in progress.*
@@ -40,10 +34,10 @@ graph LR
 Every arrow is a **validation gate**. A failed gate blocks the pipeline and
 forces a design fix in the scene IR — then everything reruns.
 
-## What the agent caught on its own
+## Defects caught by validation gates
 
-No human fixed anything by hand. Every defect below was found by an automated
-validation gate, then fixed in the scene IR, then the whole pipeline reran:
+Defects found by automated validation gates, fixed in the scene IR, followed
+by a full pipeline rerun:
 
 | # | Found by | Defect | Fix |
 |---|---|---|---|
@@ -112,17 +106,3 @@ Interactive Blender previews (where present) live next to each task, e.g.
 └── docs/                            PIPELINE.md · ITERATION_LOG.md
 ```
 
-## Roadmap
-
-- [x] Articulated tasks: hinged lid, drawer (revolute + prismatic)
-- [ ] Scale preview tasks to full datasets (30+ episodes each)
-- [ ] MimicGen-style amplification: keypoints re-anchored per episode
-- [ ] LeRobot conversion + SmolVLA/ACT fine-tuning loop
-- [ ] Domain randomization: spec-driven batch scene variants
-- [ ] Isaac Sim backend compiled from the same IR
-- [ ] Visual sync: Blender authoring renders matched to MuJoCo styling
-
----
-
-*Built autonomously by GLM-5.3-Flash as a coding agent. Human input: the task
-ideas and design review. Zero hand-fixes to scenes, code, or data.*
