@@ -3,7 +3,6 @@
 run_pipeline.py — agentic scene-to-data pipeline, one-command end-to-end
 =========================================================================
 
-  [1]   Blender scene build + IR dump   build_scene_bottle.py -> .blend + spec
   [1.5] Blender M0 render receipts      (3 fixed cameras)
   [2]   IR -> MJCF compile              compile_mjcf.py
   [3]   Physics settle self-check       test_mjcf_physics.py
@@ -21,13 +20,15 @@ Exit 0 only if every stage passes.
 """
 
 import argparse
+import shutil
 import subprocess
 import sys
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BLENDER = r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 PYTHON = sys.executable
+# Blender location: PATH lookup first, override with BLENDER_EXE env var
+BLENDER = os.environ.get("BLENDER_EXE") or shutil.which("blender")
 
 
 def run(name, cmd):
@@ -41,7 +42,6 @@ def run(name, cmd):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--skip-blender", action="store_true")
     ap.add_argument("--skip-renders", action="store_true")
     ap.add_argument("--episodes", type=int, default=8)
     args = ap.parse_args()
