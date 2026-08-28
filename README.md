@@ -3,14 +3,20 @@
 **One coding-agent skill that turns natural-language manipulation tasks into
 physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
 
+<p align="center">
+  <img src="images/grasp_demo.gif" width="49%" alt="Put the red cube in the box">
+  <img src="images/lid_open.gif" width="49%" alt="Flip open the hinged lid">
+</p>
+<p align="center"><sub>Left: put the red cube in the box · Right: flip open the hinged lid</sub></p>
+
 ## Tasks
 
-| Task | Instruction | Joint type | Success | |
-|---|---|---|---|---|
-| [`pipeline/` put-red-in-box](pipeline/) | put the red cube into the transparent storage box | — (free objects) | **100%** | ![put in box](images/grasp_demo.gif) |
-| [`tasks/bottle_tray`](tasks/bottle_tray/) | put the green bottle in the tray | — (novel objects: bottle + tray) | **100%** | ![bottle in tray](images/bottle_tray.gif) |
-| [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | **100%** | ![lid open](images/lid_open.gif) |
-| [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | **100%** | ![two tier sort](images/two_tier_sort.gif) |
+| Task | Instruction | Joint type | |
+|---|---|---|---|
+| [`pipeline/` put-red-in-box](pipeline/) | put the red cube into the transparent storage box | — (free objects) | ![put in box](images/grasp_demo.gif) |
+| [`tasks/bottle_tray`](tasks/bottle_tray/) | put the green bottle in the tray | — (novel objects: bottle + tray) | ![bottle in tray](images/bottle_tray.gif) |
+| [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | ![lid open](images/lid_open.gif) |
+| [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | ![two tier sort](images/two_tier_sort.gif) |
 
 *Single-episode tasks are preview builds — the policies and validation gates
 are complete, dataset scaling is in progress.*
