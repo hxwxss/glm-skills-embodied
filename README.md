@@ -3,8 +3,6 @@
 **One coding-agent skill that turns natural-language manipulation tasks into
 physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
 
-
-
 ## Tasks
 
 | Task | Instruction | Joint type | Success | |
