@@ -74,7 +74,7 @@ def joint_controller_config():
     return cfg
 
 
-def make_env(camera_obs=False, height=256, horizon=4600):
+def make_env(camera_obs=False, height=256, horizon=7000):
     env = TwoTierSort(
         has_renderer=False,
         has_offscreen_renderer=camera_obs,
@@ -263,7 +263,10 @@ class IKExpert:
         bar0 = self.env.drawer_bar_pos()
         wps = [self._wp(bar0 + [0, 0, hover_h], -1, "drawer-hover"),
                self._wp(bar0 + [0, 0, dz], -1, "drawer-descend"),
-               self._cmd(1, int(ex_d["close_dwell"]))]
+               self._cmd(1, int(ex_d["close_dwell"])),
+               dict(pos=None, gripper=1, note="grasp-check", dwell=0,
+                    grasp_check=(np.asarray(bar0, dtype=float), dz,
+                                 int(ex_d["close_dwell"])))]
         for s in np.linspace(0.0, float(ex_d["pull_distance_m"]),
                              int(ex_d["pull_steps"]) + 1)[1:]:
             wps.append(self._wp(bar0 + [0, -s, dz], 1, "drawer-pull-%.3f" % s,
@@ -345,7 +348,10 @@ class IKExpert:
         bar_open = self.env.drawer_bar_pos()   # live: at the open stop
         wps = [self._wp(bar_open + [0, 0, hover_h], -1, "dc-hover"),
                self._wp(bar_open + [0, 0, dz], -1, "dc-descend"),
-               self._cmd(1, int(ex_d["close_dwell"]))]
+               self._cmd(1, int(ex_d["close_dwell"])),
+               dict(pos=None, gripper=1, note="grasp-check", dwell=0,
+                    grasp_check=(np.asarray(bar_open, dtype=float), dz,
+                                 int(ex_d["close_dwell"])))]
         for s in np.linspace(s_full, -overshoot,
                              int(ex_d["push_steps"]) + 1)[1:]:
             # bar at slide s sits +y of the open position by (s_full - s);
@@ -369,21 +375,23 @@ class IKExpert:
         closes the last ~9 deg gently.
 
         At the open stop the bar sits ~0.70 m out and ~1.03 m up, where an
-        exact top-down wrist is unreachable (16-19 deg residual that
-        wedged the cold-start grasp).  The achievable wrist correction is
-        MEASURED once (solve top-down, extract the residual rotation) and
-        applied with a linear taper to zero at the closed end."""
+        exact top-down wrist is unreachable (~17 deg residual).  Demanding
+        that pose wedges the hand against the lid panel for the full
+        waypoint budget, so the approach runs with a LOOSE tracking
+        tolerance (best-effort top-down); the pad grip on the 18 mm square
+        bar tolerates the tilt and is verified by ensure_bar_grasp right
+        after the close.  On retry the bar is grasped WHERE IT IS (a
+        partial attempt leaves it mid-arc)."""
         ex_c = self.env.spec["task"]["expert"]["close_lid"]
-        ex_l = self.env.spec["task"]["expert"]["lid"]
+        th_end = float(self.env.spec["task"]["expert"]["lid"]["arc_end_rad"])
         dz = float(ex_c["grasp_dz_m"])
         hover_h = float(ex_c["hover_height_m"])
-        th_end = float(ex_l["arc_end_rad"])
         th_close = float(ex_c["arc_end_rad"])
         # grasp the bar WHERE IT IS: after a partial close attempt the lid
         # rests somewhere mid-arc and the arc-end position would grasp air
         bar_open = self.env.lid_bar_pos()
-        th_start = float(np.clip(self.env.lid_angle(),
-                                 min(th_close, th_end), max(th_close, th_end)))
+        th_start = float(self.env.lid_angle())
+        th_start = float(np.clip(th_start, th_close, th_end))
 
         # approach HIGH and over the top: a direct path from the front
         # cuts through the standing lid panel (presses it) while the
@@ -392,43 +400,21 @@ class IKExpert:
         via1 = np.array([bar_open[0], -0.10, 1.30])
         via2 = np.array([bar_open[0], bar_open[1], 1.30])
 
-        # measure the achievable wrist correction at the grasp pose
-        q_arm, perr, rerr = self.solve_ik(bar_open + [0, 0, dz])
-        self.cfg.data.qpos[:] = self.d.qpos
-        self.cfg.data.qpos[self.arm_adrs] = q_arm
-        mujoco.mj_forward(self.m, self.cfg.data)
-        R_ach = np.array(self.cfg.data.xmat[self.eef_bid]).reshape(3, 3)
-        R_err = R_ach @ GRASP_ROT.T
-        w = np.array([R_err[2, 1] - R_err[1, 2],
-                      R_err[0, 2] - R_err[2, 0],
-                      R_err[1, 0] - R_err[0, 1]])
-        max_ang = float(np.arctan2(np.linalg.norm(w),
-                                   np.trace(R_err) - 1.0))
-        axis = w / (np.linalg.norm(w) + 1e-12)
-        K = np.array([[0.0, -axis[2], axis[1]],
-                      [axis[2], 0.0, -axis[0]],
-                      [-axis[1], axis[0], 0.0]])
-
-        def cl_rot(th):
-            """Measured correction, tapered to zero at the closed end."""
-            t = max(0.0, (th - th_close) / max(th_start - th_close, 1e-6))
-            ang = max_ang * t
-            c, s = math.cos(ang), math.sin(ang)
-            return (np.eye(3) + s * K + (1.0 - c) * (K @ K)) @ GRASP_ROT
-
-        wps = [self._wp(via1, -1, "cl-via1", rot=cl_rot(th_start)),
-               self._wp(via2, -1, "cl-via2", rot=cl_rot(th_start)),
+        wps = [self._wp(via1, -1, "cl-via1", tol=0.06),
+               self._wp(via2, -1, "cl-via2", tol=0.06),
                self._wp(bar_open + [0, 0, hover_h], -1, "cl-hover",
-                        rot=cl_rot(th_start)),
-               self._wp(bar_open + [0, 0, dz], -1, "cl-descend",
-                        rot=cl_rot(th_start)),
+                        tol=0.06),
+               self._wp(bar_open + [0, 0, dz], -1, "cl-descend", tol=0.06),
                self._cmd(1, int(ex_c["close_dwell"])),
+               dict(pos=None, gripper=1, note="grasp-check", dwell=0,
+                    grasp_check=(np.asarray(bar_open, dtype=float), dz,
+                                 int(ex_c["close_dwell"]))),
                self._wp(bar_open + [0, 0, dz + 0.008], 1, "cl-seat",
-                        rot=cl_rot(th_start))]
+                        tol=0.06)]
         for th in np.linspace(th_start, th_close, int(ex_c["arc_steps"])):
             wps.append(self._wp(self.lid_bar_at(th) + [0, 0, dz], 1,
                                 "cl-arc-%.2f" % th, int(ex_c["arc_dwell"]),
-                                rot=cl_rot(th), tol=0.06))
+                                tol=0.06))
         # release WHILE retreating up+back: a frozen release lets the
         # falling lid's handle land in the open jaw, which cradles the lid
         # half-open (observed: lid stuck at -0.42 rad)
@@ -556,6 +542,27 @@ class IKExpert:
                 return True, jsteps
         return False, jsteps
 
+    def ensure_bar_grasp(self, env, bar_pos, dz, dwell, attempts=2,
+                         lo=0.030, hi=0.120):
+        """Verify the pads actually pinch the bar (measured on-bar reading
+        ~39 mm; open ~160 mm; empty-closed ~2 mm); otherwise re-approach
+        and re-close.  Catches closed-on-air grasps without burning a
+        whole phase retry."""
+        for _ in range(attempts):
+            sp = self.gripper_spread()
+            if lo <= sp <= hi:
+                return True
+            q, _, _ = self.solve_ik(bar_pos + [0, 0, 0.10])
+            self._track(env, q, -1.0)
+            q, _, _ = self.solve_ik(bar_pos + [0, 0, dz])
+            self._track(env, q, -1.0)
+            hold = np.zeros(env.action_dim)
+            hold[:7] = self.d.qpos[self.arm_adrs]
+            hold[7] = 1.0
+            for _ in range(dwell):
+                env.step(hold)
+        return lo <= self.gripper_spread() <= hi
+
     def recovery_lift(self, env, cube):
         """After a failed place attempt, climb back to carry height above
         the cube's live position and let the scene settle before the retry
@@ -571,7 +578,7 @@ class IKExpert:
             env.step(hold)
 
     def execute(self, env, phases=None, record_hook=None, step_cb=None,
-                verbose=False, max_attempts=3):
+                verbose=False, max_attempts=4):
         """Run every phase; each phase is retried (up to `max_attempts`)
         until its verifier holds.  step_cb(action, obs) fires after every
         env.step (dataset recording / contact audits)."""
@@ -585,6 +592,7 @@ class IKExpert:
         for name, builder, verify in phases:
             ok = False
             for attempt in range(1, max_attempts + 1):
+              try:
                 if name.startswith(("place", "close")):
                     self.ensure_open(env)
                     if attempt > 1:
@@ -629,6 +637,11 @@ class IKExpert:
                                 if done:
                                     break
                     else:
+                        check = wp.get("grasp_check")
+                        if check is not None:
+                            self.ensure_bar_grasp(env, check[0], check[1],
+                                                  check[2])
+                            continue
                         hold = np.zeros(env.action_dim)
                         hold[:7] = self.d.qpos[self.arm_adrs]
                         hold[7] = float(wp["gripper"])
@@ -651,6 +664,12 @@ class IKExpert:
                 if verbose:
                     print("   [verify FAILED] %s (attempt %d)"
                           % (name, attempt))
+              except ValueError:
+                # episode terminated (horizon): stop cleanly, do not step
+                # a terminated env in the remaining phases
+                done = True
+                ok = False
+                break
             info[name] = ok
             if done:
                 break
