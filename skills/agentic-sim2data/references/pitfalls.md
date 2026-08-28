@@ -107,3 +107,23 @@ reference pipeline. Check this list before debugging "impossible" behavior.
     open→manipulate→close chains, check each sub-goal (lid open, object placed,
     lid closed) separately during data collection; a single end-state check
     makes failures undebuggable.
+
+## Action semantics (LIBERO drop-in)
+
+24. **Absolute joint-position actions ≠ LIBERO's OSC-delta actions.** LIBERO
+    demonstrations store 7-dim end-effector delta poses (OSC_POSE). A pipeline
+    that collects absolute joint targets (JOINT_POSITION controller) produces
+    valid data in a *different* action space. Either convert offline (requires
+    re-simulating with an OSC controller) or document the action space and let
+    the downstream training head match it. Never mix the two in one dataset.
+25. **`env.controller_configs` after reset is robosuite's normalized internal
+    dict** — it contains internal keys (`ignore_done`, flat `input_type`...)
+    that `PutRedInBox.__init__` (or any env constructor) will reject when
+    replayed via `robosuite.make`. Store the config captured *before* reset
+    (the composite dict you passed in), not the post-reset normalized one.
+26. **Robot base world pose is not part of `qpos`.** Fixed-base robots weld
+    the mount to the world at the pose set by `set_base_xpos`; a rebuild via
+    `robosuite.make` may place the base differently (default logic vs custom).
+    Store `base_pos` in `env_args` and re-apply after make, or states replay
+    will show a constant vertical offset equal to the base-height difference
+    (0.912 m with RethinkMount).

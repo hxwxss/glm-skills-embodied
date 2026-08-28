@@ -56,13 +56,34 @@ def joint_controller_config():
     return cfg
 
 
-def make_env(camera_obs=False, height=512, horizon=1400):
+def absolute_controller_config():
+    """robosuite BASIC composite 配置,右臂改为绝对关节位置控制.
+
+    env_args(数据集重建)与 make_env 共用这一份配置,保证
+    "写入的动作语义"和"重建环境的动作语义"永远一致。
+    """
+    from robosuite import load_composite_controller_config
+    cfg = load_composite_controller_config(controller="BASIC", robot="Panda")
+    arm = cfg["body_parts"]["right"]
+    # 专家产出的是 IK 关节轨迹 → 控制器必须是关节位置(绝对)类型;
+    # 默认的 OSC_POSE 会把 7 维关节角误读成末端位姿目标
+    arm["type"] = "JOINT_POSITION"
+    arm["input_type"] = "absolute"
+    # 关节弧度可达 ±π 以上,默认 ±1 会静默截断
+    arm["input_max"] = [4.5] * 7
+    arm["input_min"] = [-4.5] * 7
+    # kp=30 实测跟踪最优:1(默认)太软甩不到位,120 会过冲震荡
+    arm["kp"] = 30
+    return cfg
+
+
+def make_env(camera_obs=False, height=512, horizon=1400, controller_configs=None):
     # RethinkMount 版本经过四点可达性审计(err<5mm),保持一致以保证可复现
     return PutRedInBox(
         has_renderer=False,
         has_offscreen_renderer=camera_obs,
         use_camera_obs=camera_obs,
-        controller_configs=joint_controller_config(),
+        controller_configs=controller_configs or joint_controller_config(),
         base_types=["RethinkMount"],
         camera_names=["agentview"],
         camera_heights=height,

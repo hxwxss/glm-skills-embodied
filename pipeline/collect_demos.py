@@ -36,7 +36,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def collect(episodes, out_path, camera=True):
     import mujoco as _mj
-    env = make_env(camera_obs=camera)
+    from expert_ik import absolute_controller_config
+    # env_args 存"构造时传入"的 composite 控制器配置;
+    # reset 后 env 内部的规范化 dict 含内部键,原样传回会重建失败
+    controller_cfg = absolute_controller_config()
+    env = make_env(camera_obs=camera, controller_configs=controller_cfg)
     expert = IKExpert(env)
     ren = _mj.Renderer(env.sim.model._model, height=480, width=640)
     cam = _mj.MjvCamera()
@@ -59,8 +63,36 @@ def collect(episodes, out_path, camera=True):
 
         frames = {"actions": [], "agentview_image": [], "robot0_eef_pos": [],
                   "robot0_eef_quat": [], "robot0_joint_pos": [],
-                  "robot0_gripper_qpos": [], "dones": []}
+                  "robot0_gripper_qpos": [], "states": [], "dones": []}
         success = False
+
+        # LIBERO drop-in: full MJCF + env_args captured right after reset
+        model_xml = env.model.get_xml()
+        env_args = {
+            "env_name": "PutRedInBox",
+            "env_type": 0,
+            "env_kwargs": {
+                "robots": ["Panda"],
+                # 完整 composite 控制器配置:重建时保持绝对关节位置语义
+                "controller_configs": controller_cfg,
+                "control_freq": int(env.control_freq),
+                "has_renderer": False,
+                "has_offscreen_renderer": True,
+                "use_camera_obs": False,
+            },
+            "init_seed": None,
+            # 机器人基座世界位姿(重建时 set_base_xpos 恢复)
+            "base_pos": [float(v) for v in env.panda_base_pos],
+        }
+
+        def sim_state_vec():
+            st = env.sim.get_state()
+            parts = [np.asarray(st.qpos, dtype=float).ravel(),
+                     np.asarray(st.qvel, dtype=float).ravel()]
+            act = getattr(st, "act", None)
+            if act is not None:
+                parts.append(np.asarray(act, dtype=float).ravel())
+            return np.concatenate(parts)
 
         # 手动逐步执行以同步记录(与 expert.run 相同逻辑)
         wps = expert.plan(cube0)
@@ -77,6 +109,7 @@ def collect(episodes, out_path, camera=True):
             frames["robot0_eef_quat"].append(np.array(obs["robot0_eef_quat"]))
             frames["robot0_joint_pos"].append(np.array(obs["robot0_joint_pos"]))
             frames["robot0_gripper_qpos"].append(np.array(obs["robot0_gripper_qpos"]))
+            frames["states"].append(sim_state_vec())
             frames["dones"].append(bool(done))
         for wp_i, wp in enumerate(wps):
             if wp["pos"] is not None:
@@ -103,6 +136,10 @@ def collect(episodes, out_path, camera=True):
             if done or success:
                 break
 
+        # LIBERO convention: the final transition of every episode is a done
+        if len(frames["dones"]):
+            frames["dones"][-1] = True
+
         wins += int(success)
         cube_end = np.array(env.sim.data.xpos[env.obj_body_id["RedCube"]])
         episodes_data.append({
@@ -110,6 +147,9 @@ def collect(episodes, out_path, camera=True):
             "obs": {k: np.array(v) for k, v in frames.items()
                     if k not in ("actions", "dones")},
             "dones": np.array(frames["dones"], dtype=np.uint8),
+            "states": np.array(frames["states"], dtype=float),
+            "model_file": model_xml,
+            "env_args": env_args,
             "success": bool(success),
             "steps": jsteps,
             "cube_start": cube0.tolist(),
@@ -131,14 +171,17 @@ def collect(episodes, out_path, camera=True):
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with h5py.File(out_path, "w") as f:
         f.attrs["spec_snapshot"] = json.dumps(env.spec)
-        f.attrs["success_rate"] = wins / max(episodes, 1)
-        f.attrs["total_episodes"] = episodes
+        f.attrs["success_rate"] = wins / max(len(episodes_data), 1)
+        f.attrs["total_episodes"] = len(episodes_data)
         grp = f.create_group("data")
         for i, ep in enumerate(episodes_data):
             g = grp.create_group(f"demo_{i}")
             g.attrs["num_samples"] = len(ep["dones"])
             g.attrs["success"] = ep["success"]
             g.attrs["instruction"] = ep["instruction"]
+            g.attrs["model_file"] = ep["model_file"]
+            g.attrs["env_args"] = json.dumps(ep["env_args"])
+            g.create_dataset("states", data=ep["states"], compression="gzip")
             g.create_dataset("actions", data=ep["actions"], compression="gzip")
             obs_g = g.create_group("obs")
             for k, v in ep["obs"].items():

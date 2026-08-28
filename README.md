@@ -1,7 +1,8 @@
 # GLM Embodied Data Skills
 
 **One coding-agent skill that turns natural-language manipulation tasks into
-physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
+physically validated MuJoCo scenes and LIBERO-compatible demonstration
+datasets.**
 
 <p align="center">
   <img src="images/grasp_demo.gif" width="49%" alt="Put the red cube in the box">

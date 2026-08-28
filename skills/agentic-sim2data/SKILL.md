@@ -118,7 +118,25 @@ Verify end-state geometry (object inside container, not intersecting walls).
 Keep a whitelist for legitimate resting/grasp contacts. This stage routinely
 finds real defects — treat every failure as a design fix, not noise.
 
-### M4 Dataset (LIBERO/robosuite schema)
+### M4 Dataset (LIBERO drop-in schema)
+
+Write HDF5 directly. For the dataset to be **drop-in loadable by the official
+LIBERO scripts** (not just "similar"), every episode needs:
+
+- `model_file` attr: the full MJCF string of the compiled env (serialize
+  `env.model.get_xml()` after reset — it embeds robots, arena and objects);
+- `states` (T, nq+nv): full sim state per step (`env.sim.get_state()` flattened);
+  replay = write qpos/qvel into `MjData` + `mj_forward` — must reproduce the
+  recorded EE pose to <5 mm;
+- `env_args` attr: JSON with `env_name` (registered in
+  `robosuite.environments.base.REGISTERED_ENVS`), `env_kwargs` exactly as
+  passed to the env constructor (controller config must be the composite dict
+  captured *before* reset — the normalized dict robosuite keeps after reset
+  contains internal keys and will fail reconstruction);
+- `dones[-1] = True` forced (expert policies that break early leave the last
+  step's done=False);
+- action semantics documented explicitly (absolute joint-position vs OSC
+  delta — downstream training heads differ).
 
 Write HDF5 directly:
 
