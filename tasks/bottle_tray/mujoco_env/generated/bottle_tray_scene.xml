@@ -1,0 +1,42 @@
+<mujoco model="bottle_tray_tabletop">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <visual>
+    <headlight ambient="0.45 0.45 0.5" diffuse="0.65 0.65 0.7" specular="0.15 0.15 0.15"/>
+  </visual>
+  <statistic center="0.1 0 0.55" meansize="0.04" extent="2.66"/>
+  <asset>
+    <texture name="table_tex" type="2d" builtin="checker" rgb1="0.58 0.59 0.62" rgb2="0.88 0.88 0.9" width="640" height="640"/>
+    <material name="table_mat" texture="table_tex" texrepeat="10 5" reflectance="0.06" shininess="0.3"/>
+    <texture name="floor_tex" type="2d" builtin="checker" rgb1="0.30 0.31 0.33" rgb2="0.38 0.39 0.41" width="512" height="512"/>
+    <material name="floor_mat" texture="floor_tex" texrepeat="6 6" reflectance="0.10" shininess="0.4"/>
+  </asset>
+  <worldbody>
+    <light name="key_light" directional="true" pos="0.2 -1.2 2.4" dir="0.05 0.4 -0.9" diffuse="0.72 0.72 0.72"/>
+    <light name="fill_light" directional="true" pos="-1.5 -1.5 1.8" dir="0.6 0.6 -0.5" diffuse="0.35 0.36 0.4"/>
+    <geom name="room_floor" type="plane" size="5 5 0.05" pos="0 0 0.0" material="floor_mat"/>
+    <!-- table: top surface at 0.620 m, light checkerboard -->
+    <geom name="table_top" type="box" pos="0 0 0.5975" size="0.9500 0.4750 0.0225" material="table_mat" friction="0.6 0.008 0.0002"/>
+    <geom name="table_leg_0" type="cylinder" pos="-0.8500 -0.3750 0.2875" size="0.0250 0.2875" rgba="0.14 0.14 0.15 1"/>
+    <geom name="table_leg_1" type="cylinder" pos="0.8500 -0.3750 0.2875" size="0.0250 0.2875" rgba="0.14 0.14 0.15 1"/>
+    <geom name="table_leg_2" type="cylinder" pos="-0.8500 0.3750 0.2875" size="0.0250 0.2875" rgba="0.14 0.14 0.15 1"/>
+    <geom name="table_leg_3" type="cylinder" pos="0.8500 0.3750 0.2875" size="0.0250 0.2875" rgba="0.14 0.14 0.15 1"/>
+    <geom name="RedSphere" type="sphere" pos="-0.240000 0.140000 0.670000" size="0.050000" rgba="0.760 0.040 0.040 1.0"/>
+    <!-- Tray: shallow tray, opening upward -->
+    <body name="Tray" pos="0.200000 -0.260000 0.620000">
+      <geom name="Tray_wall0" type="box" pos="0.000000 -0.065000 0.034500" size="0.085000 0.006000 0.022500" rgba="0.040 0.090 0.500 1"/>
+      <geom name="Tray_wall1" type="box" pos="0.000000 0.065000 0.034500" size="0.085000 0.006000 0.022500" rgba="0.040 0.090 0.500 1"/>
+      <geom name="Tray_wall2" type="box" pos="-0.085000 0.000000 0.034500" size="0.006000 0.053000 0.022500" rgba="0.040 0.090 0.500 1"/>
+      <geom name="Tray_wall3" type="box" pos="0.085000 0.000000 0.034500" size="0.006000 0.053000 0.022500" rgba="0.040 0.090 0.500 1"/>
+      <geom name="Tray_bottom" type="box" pos="0.000000 0.000000 0.006000" size="0.085000 0.065000 0.006000" rgba="0.040 0.090 0.500 1"/>
+      <site name="goal_zone" type="box" pos="0.000000 0.000000 0.082000" size="0.0480 0.0280 0.0300" rgba="0.15 1.0 0.3 0.08" group="3"/>
+    </body>
+    <body name="GreenBottle" pos="0.020000 -0.080000 0.690500">
+      <freejoint name="GreenBottle_free"/>
+      <geom name="GreenBottle" type="cylinder" size="0.025000 0.070000" mass="0.150" rgba="0.020 0.360 0.100 1.0" friction="0.7 0.01 0.0005" condim="4"/>
+      <!-- dims: 0.025000 0.070000 | semantic: grasp_target -->
+    </body>
+    <camera name="agentview" mode="fixed" pos="-0.7800 -0.2800 1.0800" xyaxes="0.110432 -0.993884 0.000000 0.434365 0.048263 0.899443" fovy="45"/>
+  </worldbody>
+  <actuator/>
+</mujoco>

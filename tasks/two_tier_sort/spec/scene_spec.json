@@ -1,0 +1,758 @@
+{
+  "schema": "scene-spec/v0.4-tier",
+  "scene_name": "panda_two_tier_sort",
+  "units": "meters",
+  "up_axis": "z",
+  "gravity": [
+    0.0,
+    0.0,
+    -9.81
+  ],
+  "workspace": {
+    "table_top_z": 0.75,
+    "table_size_xy": [
+      1.9,
+      0.95
+    ],
+    "table_half_thickness": 0.0225,
+    "table_rgba": [
+      0.2,
+      0.21,
+      0.23,
+      1.0
+    ],
+    "floor_z": 0.0
+  },
+  "objects": [
+    {
+      "id": "Control_Panel_Deck",
+      "physics": "static",
+      "shape": "box",
+      "dims": [
+        0.2,
+        0.13,
+        0.022
+      ],
+      "pos": [
+        -0.55,
+        -0.3,
+        0.772
+      ],
+      "rot_euler_xyz": [
+        -0.1745,
+        0.0,
+        0.1396
+      ],
+      "rgba": [
+        0.1,
+        0.11,
+        0.125,
+        1.0
+      ],
+      "semantic": [
+        "obstacle"
+      ]
+    },
+    {
+      "id": "Desk_Lamp_Base",
+      "physics": "static",
+      "shape": "cylinder",
+      "dims": [
+        0.085,
+        0.024
+      ],
+      "pos": [
+        -0.78,
+        0.26,
+        0.774
+      ],
+      "rgba": [
+        0.55,
+        0.56,
+        0.58,
+        1.0
+      ],
+      "semantic": [
+        "obstacle"
+      ]
+    },
+    {
+      "id": "TierBox",
+      "physics": "static_composite",
+      "semantic": [
+        "container",
+        "fixture"
+      ],
+      "body_pos": [
+        0.3,
+        0.1,
+        0.75
+      ],
+      "walls": [
+        {
+          "name": "housing_bottom",
+          "pos": [
+            0.0,
+            0.0,
+            0.004
+          ],
+          "size": [
+            0.11,
+            0.075,
+            0.004
+          ],
+          "role": "floor"
+        },
+        {
+          "name": "housing_left",
+          "pos": [
+            -0.106,
+            0.0,
+            0.0465
+          ],
+          "size": [
+            0.004,
+            0.075,
+            0.038500000000000006
+          ]
+        },
+        {
+          "name": "housing_right",
+          "pos": [
+            0.106,
+            0.0,
+            0.0465
+          ],
+          "size": [
+            0.004,
+            0.075,
+            0.038500000000000006
+          ]
+        },
+        {
+          "name": "housing_back",
+          "pos": [
+            0.0,
+            0.071,
+            0.0465
+          ],
+          "size": [
+            0.11,
+            0.004,
+            0.038500000000000006
+          ]
+        },
+        {
+          "name": "housing_top",
+          "pos": [
+            0.0,
+            0.0,
+            0.081
+          ],
+          "size": [
+            0.11,
+            0.075,
+            0.004
+          ],
+          "role": "compartment_floor"
+        },
+        {
+          "name": "upper_front",
+          "pos": [
+            0.0,
+            -0.071,
+            0.125
+          ],
+          "size": [
+            0.11,
+            0.004,
+            0.04
+          ]
+        },
+        {
+          "name": "upper_back",
+          "pos": [
+            0.0,
+            0.071,
+            0.125
+          ],
+          "size": [
+            0.11,
+            0.004,
+            0.04
+          ]
+        },
+        {
+          "name": "upper_left",
+          "pos": [
+            -0.106,
+            0.0,
+            0.125
+          ],
+          "size": [
+            0.004,
+            0.067,
+            0.04
+          ]
+        },
+        {
+          "name": "upper_right",
+          "pos": [
+            0.106,
+            0.0,
+            0.125
+          ],
+          "size": [
+            0.004,
+            0.067,
+            0.04
+          ]
+        }
+      ],
+      "rgba": [
+        0.3,
+        0.34,
+        0.42,
+        1.0
+      ],
+      "floor_rgba": [
+        0.22,
+        0.25,
+        0.32,
+        1.0
+      ],
+      "rim_rgba": [
+        1.0,
+        0.62,
+        0.0,
+        1.0
+      ],
+      "hinged_lid": {
+        "id": "Lid",
+        "joint": "lid_hinge",
+        "hinge_body_pos": [
+          0.3,
+          0.177,
+          0.921
+        ],
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "range_rad": [
+          -2.1,
+          0.0
+        ],
+        "damping": 0.02,
+        "geoms": [
+          {
+            "name": "lid_panel",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.0705,
+              0.0
+            ],
+            "size": [
+              0.111,
+              0.0725,
+              0.006
+            ],
+            "mass": 0.14,
+            "rgba": [
+              0.88,
+              0.89,
+              0.92,
+              1.0
+            ],
+            "friction": [
+              0.6,
+              0.01,
+              0.0005
+            ]
+          },
+          {
+            "name": "lid_handle_bracket",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.133,
+              0.015
+            ],
+            "size": [
+              0.015,
+              0.005,
+              0.0045
+            ],
+            "mass": 0.012,
+            "rgba": [
+              0.13,
+              0.14,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              1.0,
+              0.01,
+              0.0005
+            ]
+          },
+          {
+            "name": "lid_handle_bar",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.133,
+              0.033
+            ],
+            "size": [
+              0.009,
+              0.02,
+              0.009
+            ],
+            "mass": 0.018,
+            "rgba": [
+              0.13,
+              0.14,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              2.0,
+              0.01,
+              0.0005
+            ],
+            "semantic": [
+              "grasp_target"
+            ]
+          }
+        ],
+        "grasp_local": [
+          0.0,
+          -0.133,
+          0.033
+        ]
+      },
+      "drawer": {
+        "id": "Drawer",
+        "joint": "drawer_slide",
+        "body_pos": [
+          0.3,
+          0.08700000000000001,
+          0.758
+        ],
+        "axis": [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "range_m": [
+          0.0,
+          0.15
+        ],
+        "damping": 0.35,
+        "frictionloss": 0.4,
+        "geoms": [
+          {
+            "name": "tray_bottom",
+            "shape": "box",
+            "pos": [
+              0.0,
+              0.0,
+              0.003
+            ],
+            "size": [
+              0.098,
+              0.07,
+              0.003
+            ],
+            "mass": 0.14,
+            "rgba": [
+              0.55,
+              0.38,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              0.5,
+              0.008,
+              0.0002
+            ]
+          },
+          {
+            "name": "tray_front",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.066,
+              0.022
+            ],
+            "size": [
+              0.098,
+              0.004,
+              0.016
+            ],
+            "mass": 0.03,
+            "rgba": [
+              0.55,
+              0.38,
+              0.16,
+              1.0
+            ]
+          },
+          {
+            "name": "tray_back",
+            "shape": "box",
+            "pos": [
+              0.0,
+              0.066,
+              0.022
+            ],
+            "size": [
+              0.098,
+              0.004,
+              0.016
+            ],
+            "mass": 0.03,
+            "rgba": [
+              0.55,
+              0.38,
+              0.16,
+              1.0
+            ]
+          },
+          {
+            "name": "tray_left",
+            "shape": "box",
+            "pos": [
+              -0.094,
+              0.0,
+              0.022
+            ],
+            "size": [
+              0.004,
+              0.062000000000000006,
+              0.016
+            ],
+            "mass": 0.03,
+            "rgba": [
+              0.55,
+              0.38,
+              0.16,
+              1.0
+            ]
+          },
+          {
+            "name": "tray_right",
+            "shape": "box",
+            "pos": [
+              0.094,
+              0.0,
+              0.022
+            ],
+            "size": [
+              0.004,
+              0.062000000000000006,
+              0.016
+            ],
+            "mass": 0.03,
+            "rgba": [
+              0.55,
+              0.38,
+              0.16,
+              1.0
+            ]
+          },
+          {
+            "name": "drawer_handle_bracket",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.0925,
+              0.0425
+            ],
+            "size": [
+              0.015,
+              0.033,
+              0.0045
+            ],
+            "mass": 0.012,
+            "rgba": [
+              0.13,
+              0.14,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              1.0,
+              0.01,
+              0.0005
+            ]
+          },
+          {
+            "name": "drawer_handle_bar",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.125,
+              0.0605
+            ],
+            "size": [
+              0.009,
+              0.02,
+              0.009
+            ],
+            "mass": 0.018,
+            "rgba": [
+              0.13,
+              0.14,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              2.0,
+              0.01,
+              0.0005
+            ],
+            "semantic": [
+              "grasp_target"
+            ]
+          }
+        ],
+        "grasp_local": [
+          0.0,
+          -0.125,
+          0.0605
+        ]
+      },
+      "upper_zone_local": {
+        "center": [
+          0.0,
+          0.0,
+          0.10600000000000001
+        ],
+        "half": [
+          0.081,
+          0.046,
+          0.04
+        ]
+      },
+      "tray_zone_local": {
+        "center": [
+          0.0,
+          0.0,
+          0.027000000000000003
+        ],
+        "half": [
+          0.06899999999999999,
+          0.04100000000000001,
+          0.016
+        ]
+      }
+    },
+    {
+      "id": "RedCube",
+      "physics": "free",
+      "shape": "box",
+      "dims": [
+        0.042,
+        0.042,
+        0.042
+      ],
+      "mass": 0.05,
+      "rgba": [
+        0.85,
+        0.15,
+        0.12,
+        1.0
+      ],
+      "semantic": [
+        "grasp_target"
+      ],
+      "friction": [
+        2.0,
+        0.008,
+        0.0002
+      ],
+      "pos": [
+        -0.02,
+        -0.16,
+        0.771
+      ],
+      "task_goal": "upper_compartment"
+    },
+    {
+      "id": "BlueCube",
+      "physics": "free",
+      "shape": "box",
+      "dims": [
+        0.042,
+        0.042,
+        0.042
+      ],
+      "mass": 0.05,
+      "rgba": [
+        0.15,
+        0.35,
+        0.85,
+        1.0
+      ],
+      "semantic": [
+        "grasp_target"
+      ],
+      "friction": [
+        2.0,
+        0.008,
+        0.0002
+      ],
+      "pos": [
+        0.5,
+        -0.18,
+        0.771
+      ],
+      "task_goal": "drawer"
+    }
+  ],
+  "robots": [
+    {
+      "id": "Panda_0",
+      "type": "panda",
+      "mount": "RethinkMount",
+      "base_pos": [
+        0.22,
+        -0.45,
+        0.0
+      ],
+      "base_yaw_deg": 0.0
+    }
+  ],
+  "cameras": [
+    {
+      "id": "agentview",
+      "pos": [
+        0.02,
+        -0.62,
+        1.22
+      ],
+      "target_xyz": [
+        0.34,
+        0.08,
+        0.72
+      ],
+      "fov_deg": 50
+    },
+    {
+      "id": "sideview",
+      "pos": [
+        1.15,
+        -0.35,
+        1.12
+      ],
+      "target_xyz": [
+        0.3,
+        0.02,
+        0.8
+      ],
+      "fov_deg": 40
+    }
+  ],
+  "task": {
+    "name": "TwoTierSort",
+    "instruction": "open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again",
+    "type": "articulated_open_place_close",
+    "success_condition": {
+      "max_speed_m_s": 0.05,
+      "lid_closed_rad": 0.06,
+      "drawer_closed_m": 0.012
+    },
+    "init_randomization": {
+      "box_xy_jitter_m": 0.02,
+      "prop_xy_jitter_m": 0.04,
+      "prop_yaw_jitter_rad": 0.12
+    },
+    "expert": {
+      "lid": {
+        "hover_height_m": 0.12,
+        "grasp_dz_m": 0.0,
+        "arc_start_rad": -0.35,
+        "arc_end_rad": -1.92,
+        "arc_steps": 14,
+        "arc_dwell": 14,
+        "prerelease_lift_m": 0.05,
+        "close_dwell": 45,
+        "hold_dwell": 30,
+        "release_dwell": 30,
+        "retreat_offset_m": [
+          0.0,
+          -0.06,
+          0.14
+        ]
+      },
+      "drawer": {
+        "hover_height_m": 0.1,
+        "grasp_dz_m": 0.0,
+        "pull_distance_m": 0.15,
+        "pull_steps": 12,
+        "pull_dwell": 8,
+        "close_dwell": 45,
+        "release_dwell": 20,
+        "retreat_up_m": 0.12,
+        "retreat_offset_m": [
+          0.0,
+          -0.06,
+          0.1
+        ]
+      },
+      "close_drawer": {
+        "hover_height_m": 0.1,
+        "grasp_dz_m": 0.0,
+        "push_steps": 8,
+        "push_dwell": 4,
+        "push_overshoot_m": 0.008,
+        "close_dwell": 45,
+        "release_dwell": 20,
+        "retreat_up_m": 0.12,
+        "retreat_offset_m": [
+          0.0,
+          -0.08,
+          0.1
+        ]
+      },
+      "close_lid": {
+        "hover_height_m": 0.1,
+        "grasp_dz_m": 0.0,
+        "arc_end_rad": -0.15,
+        "arc_steps": 10,
+        "arc_dwell": 8,
+        "close_dwell": 45,
+        "release_dwell": 25,
+        "retreat_up_m": 0.13,
+        "retreat_offset_m": [
+          0.0,
+          -0.08,
+          0.12
+        ]
+      },
+      "pick": {
+        "hover_height_m": 0.11,
+        "grasp_dz_m": 0.008,
+        "close_dwell": 45,
+        "carry_z_m": 1.0,
+        "release_drop_m": 0.042,
+        "release_dwell": 25,
+        "retreat_up_m": 0.11
+      },
+      "settle_dwell": 90,
+      "final_retreat_offset_m": [
+        0.0,
+        -0.16,
+        0.12
+      ]
+    }
+  },
+  "provenance": {
+    "source_script": "build_scene.py",
+    "generated_by": "GLM-5.3-Flash coding agent"
+  }
+}

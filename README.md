@@ -1,151 +1,128 @@
 # GLM Embodied Data Skills
 
-An agentic simulation-to-data workflow for tabletop robot manipulation. The
-included skill turns a scene specification into a MuJoCo scene, validates
-physics and reachability, runs a Panda pick-and-place expert, and writes a
-LIBERO/robosuite-compatible HDF5 dataset.
+**One coding-agent skill that turns natural-language manipulation tasks into
+physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
 
-The reference task is: **put the red cube into the transparent storage box**.
-The project is intentionally small enough to inspect, rerun, and adapt to a
-new scene.
+GLM-5.3-Flash designed each scene, passed physics / reachability / penetration
+validation gates, wrote its own IK expert policies, and collected the datasets
+below — with zero hand-fixes.
 
-![Grasp demo teaser](images/demo_hd_frames.png)
+![Grasp demo](images/grasp_demo.gif)
 
-## Demo / Videos
+▶ Full video: [`videos/grasp_demo_hd.mp4`](videos/grasp_demo_hd.mp4)
 
-The repository includes three H.264/MP4 recordings. The teaser above gives a
-quick visual overview; the players below expose the recordings directly on
-this page where the GitHub renderer supports HTML5 video.
+## Tasks
 
-### Grasp demo
+| Task | Instruction | Joint type | Episodes | Success | |
+|---|---|---|---|---|---|
+| [`pipeline/` put-red-in-box](pipeline/) | put the red cube into the transparent storage box | — (free objects) | 6 | **100%** | ![put in box](images/grasp_demo.gif) |
+| [`tasks/bottle_tray`](tasks/bottle_tray/) | put the green bottle in the tray | — (novel objects: bottle + tray) | 8 | **100%** | ![bottle in tray](images/bottle_tray.gif) |
+| [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | 1 *(preview)* | **100%** | ![lid open](images/lid_open.gif) |
+| [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | 1 *(preview)* | **100%** | ![two tier sort](images/two_tier_sort.gif) |
 
-<video controls preload="metadata" playsinline width="640" poster="images/demo_hd_frames.png">
-  <source src="videos/grasp_demo_hd.mp4" type="video/mp4">
-  <a href="videos/grasp_demo_hd.mp4">Download or open the grasp demo</a>
-</video>
+*Single-episode tasks are preview builds — the policies and validation gates
+are complete, dataset scaling is in progress.*
 
-### Supplementary video 01
+## Pipeline
 
-<video controls preload="metadata" playsinline width="640">
-  <source src="videos/supplementary_demo_01.mp4" type="video/mp4">
-  <a href="videos/supplementary_demo_01.mp4">Download or open supplementary video 01</a>
-</video>
-
-### Supplementary video 02
-
-<video controls preload="metadata" playsinline width="640">
-  <source src="videos/supplementary_demo_02.mp4" type="video/mp4">
-  <a href="videos/supplementary_demo_02.mp4">Download or open supplementary video 02</a>
-</video>
-
-If GitHub's Markdown sanitizer does not render the native players in your
-browser, use the static gallery instead:
-
-**[Open the video gallery](frontend/index.html)**
-
-| Title | File | Format |
-| --- | --- | --- |
-| Grasp demo | [`videos/grasp_demo_hd.mp4`](videos/grasp_demo_hd.mp4) | 640 x 480, ~8.0 s |
-| Supplementary video 01 | [`videos/supplementary_demo_01.mp4`](videos/supplementary_demo_01.mp4) | 640 x 480, ~6.0 s |
-| Supplementary video 02 | [`videos/supplementary_demo_02.mp4`](videos/supplementary_demo_02.mp4) | 1280 x 480, ~29.4 s |
-
-To view the gallery locally:
-
-```bash
-python -m http.server 8000
-# Open http://localhost:8000/frontend/
+```mermaid
+graph LR
+    A[scene_spec.json<br/>scene IR] --> B[MJCF compile]
+    B --> C[Physics self-check<br/>settle · penetration · rest]
+    A --> D[Reachability pre-check<br/>task objects within arm reach]
+    C --> E[robosuite task<br/>arm + placements + success]
+    D --> E
+    E --> F[IK expert<br/>mink + joint-position control]
+    F --> G[Penetration audit<br/>per-pair contact depth]
+    G --> H[HDF5 dataset<br/>LIBERO/robosuite schema]
 ```
 
-## Project Overview
+Every arrow is a **validation gate**. A failed gate blocks the pipeline and
+forces a design fix in the scene IR — then everything reruns.
 
-The [`agentic-sim2data` skill`](skills/agentic-sim2data/SKILL.md) documents the
-reusable methodology and validation gates. The pipeline uses
-[`pipeline/spec/scene_spec.json`](pipeline/spec/scene_spec.json) as its single
-source of truth:
+## What the agent caught on its own
+
+No human fixed anything by hand. Every defect below was found by an automated
+validation gate, then fixed in the scene IR, then the whole pipeline reran:
+
+| # | Found by | Defect | Fix |
+|---|---|---|---|
+| 1 | Gripper-aperture check | 7 cm cube > 5.9 cm measured gripper aperture — physically ungraspable | cube resized |
+| 2 | Reachability pre-check | all objects 1.57 m from base (arm reach 0.855 m) | task zone re-laid out |
+| 3 | Action-range inspection | env silently clipped actions to ±1 — joint angles & world targets truncated | controller ranges opened to physical units |
+| 4 | Gripper telemetry | fingers never closed: gripper command written to wrong action dim (6 instead of 7) | index fixed |
+| 5 | Top-down camera render | transparent box invisible against checkerboard (color collision) | orange translucent walls + bold rim outline |
+| 6 | Penetration audit | distractor ball smashed 19.6 mm through the floor during settle | distractor made static |
+| 7 | Camera composition | featureless white table read as a wall — scene looked upside down | near-vertical top-down camera + checkerboard table texture |
+
+## Dataset
+
+Every task ships its own HDF5 in LIBERO/robosuite-compatible schema
+(see [`data/demo.hdf5`](data/demo.hdf5)):
 
 ```text
-scene spec -> MJCF compile -> physics check -> reachability check
-            -> robosuite reset test -> IK expert -> penetration audit
-            -> HDF5 demo collection
+data/demo_i
+├─ attrs: num_samples, success, instruction
+├─ actions            (T, action_dim)
+├─ obs/
+│  ├─ agentview_image (T, H, W, 3)
+│  ├─ robot0_eef_pos / quat / joint_pos / gripper_qpos
+└─ dones              (T,)
 ```
 
-The included dataset is [`data/demo.hdf5`](data/demo.hdf5) (about 53 MB). It
-contains six recorded episodes with images, robot state, actions, done flags,
-and a snapshot of the scene specification.
+Top-level attrs embed the full scene-spec IR — every episode is independently
+reconstructible.
 
-## Setup
+## The skill
 
-Requires Python 3.12 and MuJoCo/robosuite dependencies:
+[`skills/agentic-sim2data/`](skills/agentic-sim2data/SKILL.md) packages the
+entire workflow as a reusable agent skill: pipeline stages, validation gates,
+acceptance criteria, and a pitfalls reference — every entry a real bug from
+these builds. Drop it into `~/.agents/skills/` and the agent can rerun the
+whole methodology on a new scene or task.
+
+## Run a task yourself
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\\Scripts\\activate
-python -m pip install --upgrade pip
-python -m pip install mujoco robosuite robosuite-models mink h5py imageio pillow
+cd tasks/bottle_tray/mujoco_env   # or any other task
+python run_pipeline.py
 ```
 
-The included pipeline does **not** require an API key or network credential.
-For optional integrations, copy [`.env.example`](.env.example) to `.env` and
-provide values locally. Never commit `.env`; only placeholder variable names
-belong in documentation or examples.
+Requires: Python 3.12, `pip install mujoco robosuite robosuite-models mink
+h5py imageio`. Headless-safe (offscreen rendering, no GUI needed).
 
-Run the end-to-end pipeline from the repository root:
+Interactive Blender previews (where present) live next to each task, e.g.
+[`projects/blender_scene`](projects/blender_scene) for the original lab and
+`tasks/*/build_scene*.py` for the rest.
 
-```bash
-python pipeline/run_pipeline.py --episodes 6 --collect-episodes 6
-```
-
-Useful individual checks:
-
-```bash
-python pipeline/compile_mjcf.py
-python pipeline/test_mjcf_physics.py
-python pipeline/check_reachability.py
-python pipeline/task_put_red_in_box.py --reset-test 10
-python pipeline/expert_ik.py test --episodes 6
-python pipeline/test_penetration.py
-```
-
-Generated renders are written under `renders/` and are ignored by Git.
-
-## Public / Security Note
-
-- Public: the scene specification, simulator code, skill documentation,
-  validation logic, dataset schema, and the three demo videos.
-- Not public: API keys, tokens, passwords, private keys, database URLs, or
-  internal endpoints. None are required by the checked-in pipeline, and no
-  credential was found in tracked source, configuration, notebooks, logs, or
-  sample outputs during the release audit.
-- Server-side only: any future provider credential must be read from an
-  environment variable at process start and used in a server-side process.
-  Do not put it in `frontend/`, browser JavaScript, or a public build.
-- Safe frontend configuration: non-secret display settings such as video
-  paths, labels, and public feature flags may be shipped to the browser.
-
-The local Git reflog contains the original clone author metadata, which is not
-part of the tracked project files. Commit history was not rewritten as part of
-this cleanup; review or rewrite author metadata separately if your publishing
-policy requires it.
-
-## Repository Map
+## Repository map
 
 ```text
-├── frontend/                    static video gallery
-├── videos/                      three browser-playable MP4 demos
-├── data/demo.hdf5               LIBERO/robosuite-style dataset
-├── images/demo_hd_frames.png    demo frame contact sheet
-├── pipeline/
-│   ├── spec/scene_spec.json     scene IR (single source of truth)
-│   ├── compile_mjcf.py          IR -> MuJoCo scene
-│   ├── task_put_red_in_box.py   robosuite task wrapper
-│   ├── expert_ik.py             mink IK expert
-│   ├── collect_demos.py         HDF5 dataset writer
-│   ├── test_*.py                physics and penetration checks
-│   └── run_pipeline.py          one-command pipeline runner
-└── skills/agentic-sim2data/     reusable skill and pitfalls reference
+├── skills/agentic-sim2data/        ★ the skill (stages, gates, pitfalls)
+├── pipeline/                       put-red-in-box (reference task)
+│  ├── scene_spec.json              ★ scene IR
+│  └── run_pipeline.py · task · expert_ik · validators · collect
+├── tasks/
+│  ├── bottle_tray/                 bottle → tray (8 eps)
+│  ├── lid_open/                    revolute lid flip (preview)
+│  └── two_tier_sort/               hinged lid + drawer long-horizon (preview)
+├── videos/                          full-quality MP4 recordings
+├── data/demo.hdf5                   reference-task dataset
+├── images/                          demo GIFs & frames
+└── docs/                            PIPELINE.md · ITERATION_LOG.md
 ```
 
-## License
+## Roadmap
 
-No license file is currently included. Add the license that matches your
-intended public distribution before publishing a release.
+- [x] Articulated tasks: hinged lid, drawer (revolute + prismatic)
+- [ ] Scale preview tasks to full datasets (30+ episodes each)
+- [ ] MimicGen-style amplification: keypoints re-anchored per episode
+- [ ] LeRobot conversion + SmolVLA/ACT fine-tuning loop
+- [ ] Domain randomization: spec-driven batch scene variants
+- [ ] Isaac Sim backend compiled from the same IR
+- [ ] Visual sync: Blender authoring renders matched to MuJoCo styling
+
+---
+
+*Built autonomously by GLM-5.3-Flash as a coding agent. Human input: the task
+ideas and design review. Zero hand-fixes to scenes, code, or data.*

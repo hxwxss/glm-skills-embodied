@@ -84,3 +84,26 @@ reference pipeline. Check this list before debugging "impossible" behavior.
     render the same camera with `mujoco.Renderer` directly and compare
     side-by-side. This instantly separates "scene problem" from "render
     pipeline problem" (see #4).
+
+## From the multi-task builds (hinged lid, drawer, bottle-tray)
+
+19. **Blind retry descent hits the nudged object.** When a place fails and the
+    object got pushed aside, re-running the same descent trajectory presses the
+    gripper palm into the object at its new position (9 mm arm-link hit in the
+    reference build). Fix: on retry, first climb to carry height above the
+    object's *live* position and settle before descending again.
+20. **robosuite collision geom names end in `_g0`** (e.g. `RedCube_g0`), not
+    `_main` or `_geom`. Penetration-audit whitelists and contact filters must
+    match the actual names or legitimate grasp/table contacts get flagged.
+21. **Hinged lids fall back under gravity.** A revolute lid joint without
+    damping slams shut mid-trajectory, invalidating "open" states. Give the
+    joint damping/friction in the MJCF and express the open/closed success
+    condition as an angle threshold, never as velocity.
+22. **Agentview camera placement is per-task.** A camera on the opposite side
+    of the task filmed the box's back — the open lid blocked the whole scene.
+    Iterate framing with cheap M1-style renders before recording, and prefer a
+    shoulder view where the robot enters from frame left.
+23. **Long-horizon episodes need staged success checks.** For
+    open→manipulate→close chains, check each sub-goal (lid open, object placed,
+    lid closed) separately during data collection; a single end-state check
+    makes failures undebuggable.

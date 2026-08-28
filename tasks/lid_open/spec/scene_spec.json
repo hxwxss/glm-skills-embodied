@@ -1,0 +1,373 @@
+{
+  "schema": "scene-spec/v0.3-lid",
+  "scene_name": "panda_lid_open_tabletop",
+  "units": "meters",
+  "up_axis": "z",
+  "gravity": [
+    0.0,
+    0.0,
+    -9.81
+  ],
+  "workspace": {
+    "table_top_z": 0.75,
+    "table_size_xy": [
+      1.9,
+      0.95
+    ],
+    "table_half_thickness": 0.0225,
+    "table_rgba": [
+      0.2,
+      0.21,
+      0.23,
+      1.0
+    ],
+    "floor_z": 0.0
+  },
+  "objects": [
+    {
+      "id": "Control_Panel_Deck",
+      "physics": "static",
+      "shape": "box",
+      "dims": [
+        0.2,
+        0.13,
+        0.022
+      ],
+      "pos": [
+        -0.38,
+        -0.3,
+        0.772
+      ],
+      "rot_euler_xyz": [
+        -0.1745,
+        0.0,
+        0.1396
+      ],
+      "rgba": [
+        0.1,
+        0.11,
+        0.125,
+        1.0
+      ],
+      "semantic": [
+        "obstacle"
+      ]
+    },
+    {
+      "id": "Desk_Lamp_Base",
+      "physics": "static",
+      "shape": "cylinder",
+      "dims": [
+        0.085,
+        0.024
+      ],
+      "pos": [
+        -0.78,
+        0.26,
+        0.774
+      ],
+      "rgba": [
+        0.55,
+        0.56,
+        0.58,
+        1.0
+      ],
+      "semantic": [
+        "obstacle"
+      ]
+    },
+    {
+      "id": "LidBox",
+      "physics": "static_composite",
+      "semantic": [
+        "container",
+        "fixture"
+      ],
+      "body_pos": [
+        0.3,
+        0.08,
+        0.75
+      ],
+      "walls": [
+        {
+          "name": "front",
+          "pos": [
+            0.0,
+            -0.055999999999999994,
+            0.043000000000000003
+          ],
+          "size": [
+            0.08,
+            0.004,
+            0.035
+          ]
+        },
+        {
+          "name": "back",
+          "pos": [
+            0.0,
+            0.055999999999999994,
+            0.043000000000000003
+          ],
+          "size": [
+            0.08,
+            0.004,
+            0.035
+          ]
+        },
+        {
+          "name": "left",
+          "pos": [
+            -0.076,
+            0.0,
+            0.043000000000000003
+          ],
+          "size": [
+            0.004,
+            0.052,
+            0.035
+          ]
+        },
+        {
+          "name": "right",
+          "pos": [
+            0.076,
+            0.0,
+            0.043000000000000003
+          ],
+          "size": [
+            0.004,
+            0.052,
+            0.035
+          ]
+        },
+        {
+          "name": "bottom",
+          "pos": [
+            0.0,
+            0.0,
+            0.004
+          ],
+          "size": [
+            0.08,
+            0.06,
+            0.004
+          ],
+          "role": "bottom"
+        }
+      ],
+      "rgba": [
+        0.85,
+        0.45,
+        0.1,
+        0.55
+      ],
+      "bottom_rgba": [
+        0.45,
+        0.24,
+        0.06,
+        1.0
+      ],
+      "rim_rgba": [
+        1.0,
+        0.62,
+        0.0,
+        1.0
+      ],
+      "hinged_lid": {
+        "id": "Lid",
+        "joint": "lid_hinge",
+        "hinge_body_pos": [
+          0.3,
+          0.14200000000000002,
+          0.8340000000000001
+        ],
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "range_rad": [
+          -2.1,
+          0.0
+        ],
+        "damping": 0.02,
+        "geoms": [
+          {
+            "name": "lid_panel",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.0555,
+              0.0
+            ],
+            "size": [
+              0.081,
+              0.0575,
+              0.006
+            ],
+            "mass": 0.1,
+            "rgba": [
+              0.88,
+              0.89,
+              0.92,
+              1.0
+            ],
+            "friction": [
+              0.6,
+              0.01,
+              0.0005
+            ]
+          },
+          {
+            "name": "lid_handle_bracket",
+            "shape": "box",
+            "pos": [
+              0.0,
+              -0.102,
+              0.015
+            ],
+            "size": [
+              0.03,
+              0.01,
+              0.009
+            ],
+            "mass": 0.012,
+            "rgba": [
+              0.13,
+              0.14,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              1.0,
+              0.01,
+              0.0005
+            ]
+          },
+          {
+            "name": "lid_handle_bar",
+            "shape": "cylinder",
+            "pos": [
+              0.0,
+              -0.102,
+              0.033
+            ],
+            "size": [
+              0.009,
+              0.02
+            ],
+            "quat_euler_xyz_deg": [
+              90.0,
+              0.0,
+              0.0
+            ],
+            "mass": 0.018,
+            "rgba": [
+              0.13,
+              0.14,
+              0.16,
+              1.0
+            ],
+            "friction": [
+              2.0,
+              0.01,
+              0.0005
+            ],
+            "semantic": [
+              "grasp_target"
+            ]
+          }
+        ],
+        "knob_local": [
+          0.0,
+          -0.102,
+          0.033
+        ]
+      }
+    }
+  ],
+  "robots": [
+    {
+      "id": "Panda_0",
+      "type": "panda",
+      "mount": "RethinkMount",
+      "base_pos": [
+        0.22,
+        -0.45,
+        0.0
+      ],
+      "base_yaw_deg": 0.0
+    }
+  ],
+  "cameras": [
+    {
+      "id": "agentview",
+      "pos": [
+        0.31,
+        0.46,
+        1.3
+      ],
+      "target_xyz": [
+        0.28,
+        0.06,
+        0.78
+      ],
+      "fov_deg": 45
+    },
+    {
+      "id": "sideview",
+      "pos": [
+        1.15,
+        -0.32,
+        1.12
+      ],
+      "target_xyz": [
+        0.28,
+        0.08,
+        0.8
+      ],
+      "fov_deg": 40
+    }
+  ],
+  "task": {
+    "name": "OpenBoxLid",
+    "instruction": "flip open the lid of the storage box and leave it open",
+    "type": "articulated_open",
+    "target_articulation": "lid_hinge",
+    "grasp_target_geom": "lid_handle_bar",
+    "success_condition": {
+      "lid_angle_max_rad": -1.75,
+      "lid_max_speed_rad_s": 0.35
+    },
+    "joint_limit_rad": [
+      -2.1,
+      0.0
+    ],
+    "expert": {
+      "hover_height_m": 0.12,
+      "grasp_dz_m": 0.0,
+      "arc_start_rad": -0.35,
+      "arc_end_rad": -1.92,
+      "arc_steps": 10,
+      "arc_dwell": 8,
+      "prerelease_lift_m": 0.05,
+      "close_dwell": 45,
+      "hold_dwell": 30,
+      "release_dwell": 30,
+      "settle_dwell": 45,
+      "retreat_offset_m": [
+        0.0,
+        -0.1,
+        0.13
+      ]
+    },
+    "init_randomization": {
+      "box_xy_jitter_m": 0.025
+    }
+  },
+  "provenance": {
+    "source_script": "build_scene.py",
+    "generated_by": "GLM-5.3-Flash coding agent"
+  }
+}

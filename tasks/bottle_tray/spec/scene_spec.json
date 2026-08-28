@@ -1,0 +1,264 @@
+{
+  "schema": "scene-spec/v0.2",
+  "scene_name": "bottle_tray_tabletop",
+  "units": "meters",
+  "up_axis": "z",
+  "gravity": [
+    0,
+    0,
+    -9.81
+  ],
+  "workspace": {
+    "table_top_z": 0.62,
+    "table_size_xy": [
+      1.9,
+      0.95
+    ],
+    "table_half_thickness": 0.0225,
+    "table_rgba": [
+      0.77,
+      0.77,
+      0.8,
+      1
+    ],
+    "table_texture": {
+      "type": "checker",
+      "rgb1": [
+        0.58,
+        0.59,
+        0.62
+      ],
+      "rgb2": [
+        0.88,
+        0.88,
+        0.9
+      ],
+      "texrepeat": [
+        10,
+        5
+      ]
+    },
+    "floor_z": 0.0
+  },
+  "objects": [
+    {
+      "id": "GreenBottle",
+      "physics": "dynamic",
+      "shape": "cylinder",
+      "dims": [
+        0.025,
+        0.14
+      ],
+      "pos": [
+        0.02,
+        -0.08,
+        0.69
+      ],
+      "mass_kg": 0.15,
+      "rgba": [
+        0.02,
+        0.36,
+        0.1,
+        1
+      ],
+      "semantic": [
+        "grasp_target"
+      ],
+      "grasp": {
+        "style": "top_down",
+        "band_z_offset_note": "EE grasp target = bottle_center_z + grasp_band_z_offset; calibrated in-sim (palm droop / fingertip offset)",
+        "grasp_band_z_offset": 0.04
+      }
+    },
+    {
+      "id": "RedSphere",
+      "physics": "static",
+      "shape": "sphere",
+      "dims": [
+        0.05
+      ],
+      "pos": [
+        -0.24,
+        0.14,
+        0.67
+      ],
+      "rgba": [
+        0.76,
+        0.04,
+        0.04,
+        1
+      ],
+      "semantic": [
+        "distractor"
+      ],
+      "note": "static arena geom: dynamic distractors were observed to tunnel during settle (pitfall #15); a static distractor never enters the dynamics"
+    },
+    {
+      "id": "Tray",
+      "physics": "static_composite",
+      "semantic": [
+        "container"
+      ],
+      "walls": [
+        {
+          "size": [
+            0.17,
+            0.012,
+            0.045
+          ],
+          "pos": [
+            0,
+            -0.065,
+            0.0345
+          ]
+        },
+        {
+          "size": [
+            0.17,
+            0.012,
+            0.045
+          ],
+          "pos": [
+            0,
+            0.065,
+            0.0345
+          ]
+        },
+        {
+          "size": [
+            0.012,
+            0.10600000000000001,
+            0.045
+          ],
+          "pos": [
+            -0.085,
+            0,
+            0.0345
+          ]
+        },
+        {
+          "size": [
+            0.012,
+            0.10600000000000001,
+            0.045
+          ],
+          "pos": [
+            0.085,
+            0,
+            0.0345
+          ]
+        },
+        {
+          "size": [
+            0.17,
+            0.13,
+            0.012
+          ],
+          "pos": [
+            0,
+            0,
+            0.006
+          ],
+          "role": "bottom"
+        }
+      ],
+      "body_pos": [
+        0.2,
+        -0.26,
+        0.62
+      ],
+      "inner_zone": {
+        "local_offset": [
+          0,
+          0,
+          0.082
+        ],
+        "size": [
+          0.096,
+          0.056,
+          0.06
+        ],
+        "note": "success zone = vertical prism over the tray opening at the bottle standing height; moves with the tray body",
+        "rgba": [
+          0.15,
+          1.0,
+          0.3,
+          0.12
+        ]
+      },
+      "rgba": [
+        0.04,
+        0.09,
+        0.5,
+        1
+      ]
+    }
+  ],
+  "robots": [
+    {
+      "id": "Panda_0",
+      "type": "panda",
+      "mount": "floor",
+      "base_pos": [
+        0.1,
+        -0.5,
+        0.0
+      ],
+      "base_yaw_deg": 90.0,
+      "reset_home_joints": [
+        0.0,
+        -0.5,
+        0.0,
+        -1.4,
+        0.0,
+        2.0,
+        0.78
+      ],
+      "note": "NullMount (floor): the robot stands at the table edge, no tall pedestal; home posture faces the task area"
+    }
+  ],
+  "cameras": [
+    {
+      "id": "agentview",
+      "pos": [
+        -0.78,
+        -0.28,
+        1.08
+      ],
+      "target_xyz": [
+        0.12,
+        -0.18,
+        0.64
+      ],
+      "fov_deg": 45
+    },
+    {
+      "id": "wrist",
+      "type": "attached_to_gripper"
+    }
+  ],
+  "task": {
+    "name": "PutBottleInTray",
+    "instruction": "put the green bottle in the tray",
+    "type": "pick_place",
+    "grasp_object": "GreenBottle",
+    "goal_container": "Tray",
+    "success_condition": {
+      "object_in_zone": "Tray.inner_zone",
+      "max_speed_mps": 0.05,
+      "gripper_opened": true,
+      "note": "whole bottle inside the tray opening (center xy within opening minus bottle radius), standing upright (center z band), nearly at rest, gripper released"
+    },
+    "init_randomization": {
+      "grasp_object_xy_jitter_m": 0.03,
+      "tray_xy_jitter_m": 0.03,
+      "yaw_jitter_rad": 0.7
+    },
+    "grasp_constraint_note": "bottle diameter 0.05 m < PandaGripper in-sim max aperture 0.059 m; bottle height 0.14 m => top-down grasp of the upper section keeps the palm clear of the table, so NO plinth is required"
+  },
+  "provenance": {
+    "source_script": "build_scene_bottle.py",
+    "blend_file": "bottle_tray_scene.blend",
+    "generated_by": "GLM-5.3-Flash coding agent"
+  }
+}
