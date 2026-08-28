@@ -59,15 +59,11 @@ def main():
         b = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY, bid) or ""
         if b.startswith("robot0_") and g not in finger_geoms:
             arm_geoms.add(g)
-    table_gid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, "table_collision")
-    plinth_gid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, "Sample_Plinth")
     finger_geoms.discard(-1)
 
     worst = {}          # pair -> (max penetration, step)
-    ball_start = None
     arm_hits = []       # (step, other_name, depth)
     n_steps = 0
-    ok_rollout, steps, info = None, 0, {}
 
     # 逐相位执行并在每个物理控制步后扫描接触
     cube_id = env.obj_body_id["RedCube"]
@@ -75,7 +71,7 @@ def main():
     wps = ex.plan(cube0)
 
     def scan(step):
-        nonlocal n_steps, ball_start
+        nonlocal n_steps
         n_steps += 1
         for i in range(d.ncon):
             c = d.contact[i]
@@ -101,8 +97,8 @@ def main():
                 a = np.zeros(env.action_dim)
                 a[:7] = qa + np.clip(q_arm - qa, -0.25, 0.25)
                 a[7] = float(wp["gripper"])
-                obs, _, done, _ = env.step(a)
-                scan(n_steps := n_steps + 1)
+                _, _, done, _ = env.step(a)
+                scan(n_steps + 1)
                 if done:
                     break
         else:
@@ -110,8 +106,8 @@ def main():
             hold[:7] = d.qpos[ex.arm_adrs]
             hold[7] = float(wp["gripper"])
             for _ in range(int(wp.get("dwell") or 30)):
-                obs, _, done, _ = env.step(hold)
-                scan(n_steps := n_steps + 1)
+                _, _, done, _ = env.step(hold)
+                scan(n_steps + 1)
                 if done:
                     break
         if done:
@@ -137,22 +133,8 @@ def main():
         print("[ok] A. no arm-link collisions (fingers excluded)")
 
     # 2. 逐对穿透深度
-    white_pairs = {
-        frozenset(("RedCube", "table_collision")),
-        frozenset(("RedCube", "Sample_Plinth")),
-        frozenset(("RedCube", "gripper0_right_leftfinger")),
-        frozenset(("RedCube", "gripper0_right_rightfinger")),
-    }
-    ball_gid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, "YellowBall_g0")
-    ball_start = None
     for pair, (depth, step) in sorted(worst.items(), key=lambda kv: -kv[1][0]):
         names = set(pair)
-        legit = any(names == frozenset((a, b)) or names <= frozenset((a, b))
-                    for a, b in white_pairs) or \
-                any(("RedCube" in n or "BlueCyl" in n or "YellowBall" in n)
-                    for n in names) and \
-                any(("table" in n or "Sample_Plinth" in n or "box_" in n
-                     or "finger" in n) for n in names)
         # 简化判定:动态物与桌/台/爪/盒的浅接触为合法;其余任何 >PEN_WARN 可疑
         status = "ok"
         if depth > PEN_FAIL:
@@ -160,9 +142,9 @@ def main():
             failures.append(f"tunnel {pair} {depth:.3f}m")
         elif depth > PEN_WARN:
             # 合法对允许浅穿透;非白名单深穿透也可疑
-            if pair_js := (names & {"gripper0_right_leftfinger",
-                                    "gripper0_right_rightfinger",
-                                    "table_collision", "Sample_Plinth"}):
+            if names & {"gripper0_right_leftfinger",
+                        "gripper0_right_rightfinger",
+                        "table_collision", "Sample_Plinth"}:
                 status = "ok(shallow)"
             else:
                 status = "SUSPECT"

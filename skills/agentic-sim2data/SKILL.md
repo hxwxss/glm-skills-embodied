@@ -27,7 +27,8 @@ definition, success condition, init randomization, robot mount pose, cameras.
 
 Run these in order. Each stage has a hard gate; a failed gate blocks the
 pipeline and must be diagnosed before moving on. A reference implementation of
-every stage exists (see "Reference implementation" below).
+every stage exists in this repository's `pipeline/` directory (see
+"Reference implementation" below).
 
 | Stage | Gate (must pass before proceeding) |
 | --- | --- |
@@ -136,12 +137,11 @@ human review.
 
 ## Reference implementation
 
-A complete, working reference lives in `glm_zcode_trial/` of the workspace
-where this skill was developed (`build_scene.py`, `compile_mjcf.py`,
-`task_put_red_in_box.py`, `expert_ik.py`, `collect_demos.py`,
-`test_penetration.py`, `run_pipeline.py`, plus `iteration_log.md` documenting
-every bug). Reuse its structure and constants as a starting point; adapt
-names, layout, and robot to the new task.
+The checked-in `pipeline/` directory is the working reference
+(`compile_mjcf.py`, `task_put_red_in_box.py`, `expert_ik.py`,
+`collect_demos.py`, `test_penetration.py`, and `run_pipeline.py`). Reuse its
+structure and constants as a starting point; adapt names, layout, and robot to
+the new task.
 
 ## Pitfalls
 

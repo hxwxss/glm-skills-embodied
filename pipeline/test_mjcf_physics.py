@@ -95,13 +95,9 @@ def main():
         failures.append("red cube starts inside/near box")
 
     # B/C/D. 模拟并检查
-    contact_events = []
     final_speed = {}
     for step in range(STEPS):
         mujoco.mj_step(model, data)
-        for i, na in enumerate(DYNAMIC_BODIES):
-            for nb in DYNAMIC_BODIES[i+1:]:
-                pass
         if step % 250 == 0:
             zs = [data.body(bid[n]).xpos[2] for n in DYNAMIC_BODIES]
             print("   t=%.2fs z=%s" % (step * 0.002,
@@ -156,11 +152,6 @@ def main():
 
 def render_shot(model, data, out_png):
     try:
-        import cv2  # noqa
-        has_cv = True
-    except ImportError:
-        has_cv = False
-    try:
         renderer = mujoco.Renderer(model, height=480, width=640)
         cam = mujoco.MjvCamera()
         cam.lookat[:] = [0.25, 0.05, 0.72]
@@ -170,12 +161,12 @@ def render_shot(model, data, out_png):
         renderer.update_scene(data, camera=cam)
         img = renderer.render()
         os.makedirs(os.path.dirname(out_png), exist_ok=True)
-        if has_cv:
-            import cv2
-            cv2.imwrite(out_png, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-        else:
+        try:
             from PIL import Image
             Image.fromarray(img).save(out_png)
+        except ImportError:
+            import cv2
+            cv2.imwrite(out_png, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
         renderer.close()
         return True
     except Exception as exc:

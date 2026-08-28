@@ -231,7 +231,7 @@ class MJCFBuilder:
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser()
-    ap.add_argument("--spec", default=os.path.join(here, "..", "spec", "scene_spec.json"))
+    ap.add_argument("--spec", default=os.path.join(here, "spec", "scene_spec.json"))
     ap.add_argument("--out", default=os.path.join(here, "generated"))
     args = ap.parse_args()
 

@@ -17,7 +17,7 @@ collect_demos.py — M4:采集 LIBERO/robosuite 风格 HDF5 演示数据集
 并写出 dataset 级元数据(spec 快照、成功率)。
 
 用法:
-    python collect_demos.py --episodes 10 --out demos/demo.hdf5
+    python collect_demos.py --episodes 10 --out ../data/demo.hdf5
 """
 
 import argparse
@@ -28,14 +28,12 @@ import h5py
 import numpy as np
 
 from expert_ik import IKExpert, make_env
-from task_put_red_in_box import DEFAULT_SPEC
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def collect(episodes, out_path, camera=True):
     import mujoco as _mj
-    import cv2 as _cv2
     env = make_env(camera_obs=camera)
     expert = IKExpert(env)
     ren = _mj.Renderer(env.sim.model._model, height=480, width=640)
@@ -51,7 +49,7 @@ def collect(episodes, out_path, camera=True):
     episodes_data = []
     wins = 0
     for ep in range(episodes):
-        obs = env.reset()
+        env.reset()
         expert.rebind(env)
         cam.fixedcamid = _mj.mj_name2id(env.sim.model._model,
                                         _mj.mjtObj.mjOBJ_CAMERA, "agentview")
@@ -61,9 +59,6 @@ def collect(episodes, out_path, camera=True):
                   "robot0_eef_quat": [], "robot0_joint_pos": [],
                   "robot0_gripper_qpos": [], "dones": []}
         success = False
-
-        def hook(jstep, o):
-            pass
 
         # 手动逐步执行以同步记录(与 expert.run 相同逻辑)
         wps = expert.plan(cube0)

@@ -329,7 +329,7 @@
     "grasp_constraint_note": "cube edge 0.05m < PandaGripper measured max aperture 0.059m"
   },
   "provenance": {
-    "source_script": "build_scene.py",
+    "source_script": "pipeline/spec/scene_spec.json",
     "blend_file": "embodied_lab.blend",
     "generated_by": "GLM-5.3-Flash coding agent"
   }

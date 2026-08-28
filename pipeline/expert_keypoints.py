@@ -22,9 +22,8 @@ import os
 import sys
 
 import numpy as np
-import mujoco
 
-from task_put_red_in_box import PutRedInBox, DEFAULT_SPEC
+from task_put_red_in_box import PutRedInBox
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -217,7 +216,7 @@ def make_env(camera_obs=False, height=256):
 def calib():
     """打印 reset 后的关键状态并标定 gripper 动作语义."""
     env = make_env(camera_obs=False)
-    obs = env.reset()
+    env.reset()
     for _ in range(60):
         env.step(np.concatenate([np.zeros(6), [-1.0]]))
     eef = None
@@ -250,8 +249,6 @@ if __name__ == "__main__":
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
-
-    import mujoco
 
     if args.mode == "calib":
         calib()

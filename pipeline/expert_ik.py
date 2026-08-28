@@ -18,7 +18,6 @@ expert_ik.py — 离线/在线混合 IK 专家（M3 最终方案）
 """
 
 import argparse
-import math
 import os
 import sys
 
@@ -27,7 +26,6 @@ import mujoco
 import mink
 
 from task_put_red_in_box import PutRedInBox
-from robosuite.controllers import load_part_controller_config
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -169,7 +167,6 @@ class IKExpert:
         tx, ty, _ = self.zone_center
         z_lip = self.table_top_z + 2 * self.cube_half + OVER_LIP_MARGIN
         z_over = z_lip + 0.02
-        z_grasp = cz - GRASP_DROP_EXTRA * 0          # EE=掌根,下探由 IK 自适应
         W = [
             dict(pos=np.array([cx, cy, cz + APPROACH_H]), gripper=-1,
                  note="hover-above-cube"),
@@ -197,9 +194,6 @@ class IKExpert:
         self.rebind(env)
         cube_id = env.obj_body_id["RedCube"]
         cube0 = np.array(env.sim.data.xpos[cube_id]).copy()
-        fid = [j for j in range(env.sim.model.njnt)
-               if "finger" in (mujoco.mj_id2name(env.sim.model._model,
-                   mujoco.mjtObj.mjOBJ_JOINT, j) or "")]
         wps = self.plan(cube0)
         jsteps = 0
 

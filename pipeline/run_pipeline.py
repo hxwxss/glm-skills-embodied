@@ -3,17 +3,15 @@
 run_pipeline.py — Agentic Scene-to-Data 管线一键端到端运行
 ==========================================================
 
-  [1] Blender 构建场景            build_scene.py          → embodied_lab.blend + scene_spec.json
-  [2] IR 编译 MuJoCo              compile_mjcf.py         → generated/lab_scene.xml
+  [1] IR 编译 MuJoCo              compile_mjcf.py         → generated/lab_scene.xml
   [3] 静态物理自检                test_mjcf_physics.py    → settle/穿透/静止
   [4] 可达性预检                  check_reachability.py   → 全部物体在 Panda 工作域
   [5] robosuite 任务自检          task_put_red_in_box.py  → reset 分布/初始判据
   [6] IK 专家验收                 expert_ik.py test       → 成功率 ≥80%
-  [7] 演示数据采集                collect_demos.py        → demos/demo.hdf5
+  [7] 演示数据采集                collect_demos.py        → data/demo.hdf5
 
 用法:
     python run_pipeline.py                # 全流程
-    python run_pipeline.py --skip-blender # 跳过 Blender 构建(复用现有 .blend/spec)
     python run_pipeline.py --episodes 4   # 缩小采集规模(调试)
 退出码 0 = 全部阶段通过。
 """

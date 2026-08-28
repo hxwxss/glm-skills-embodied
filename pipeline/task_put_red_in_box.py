@@ -7,7 +7,7 @@ task_put_red_in_box.py — robosuite 任务封装：PutRedInBox
 
   * TableArena：1.9m × 0.95m 实验桌，顶面 0.75m（与 Blender 场景一致）
   * Panda 立于桌面后半段 (0.22, -0.30)，面向 +y 任务区（spec 定义）
-  * 动态物体：RedCube(7cm) / BlueCyl / YellowBall（free joint，可抓取/推动）
+  * 动态物体：RedCube(5cm) / BlueCyl；黄球作为静态干扰物呈现
   * 静态体：收纳盒四壁+底（joints=None）、控制面板、台灯底座
   * 成功判据：红块中心进入目标区 & 低速
 
@@ -30,7 +30,6 @@ from robosuite.models.arenas import TableArena
 from robosuite.models.tasks import ManipulationTask
 from robosuite.models.objects.primitive.box import BoxObject
 from robosuite.models.objects.primitive.cylinder import CylinderObject
-from robosuite.models.objects.primitive.ball import BallObject
 from robosuite.utils.placement_samplers import (
     SequentialCompositeSampler,
     UniformRandomSampler,
@@ -38,7 +37,7 @@ from robosuite.utils.placement_samplers import (
 from robosuite.utils.transform_utils import mat2quat
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_SPEC = os.path.join(HERE, "..", "spec", "scene_spec.json")
+DEFAULT_SPEC = os.path.join(HERE, "spec", "scene_spec.json")
 
 
 def load_spec(path=DEFAULT_SPEC):
@@ -276,7 +275,6 @@ class PutRedInBox(ManipulationEnv):
             # 让手臂初始伸向 +y（spec: base_yaw_deg）——直接写 root body 四元数
             qz = (math.cos(yaw / 2), 0.0, 0.0, math.sin(yaw / 2))
             root_body = self.robots[0].robot_model._elements["root_body"]
-            old_q = root_body.get("quat")
             new_q = "%.8f 0 0 %.8f" % qz if False else \
                 f"{qz[0]:.8f} {qz[1]:.8f} {qz[2]:.8f} {qz[3]:.8f}"
             root_body.set("quat", new_q)

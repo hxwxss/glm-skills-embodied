@@ -1,0 +1,21 @@
+# Local Python environments and generated files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Runtime artifacts
+renders/
+*.log
+
+# OS/editor metadata
+.DS_Store
+.idea/
+.vscode/

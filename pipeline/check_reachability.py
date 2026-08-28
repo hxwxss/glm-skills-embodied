@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
-"""spec.yaml 达性预检:桌面任务物体的水平距离须在 Panda 工作半径内."""
-import json, math, sys
+"""Scene-spec reachability pre-check for task-critical objects."""
+import json
+import math
+import sys
+from pathlib import Path
 
-spec = json.load(open(r"..\spec\scene_spec.json", encoding="utf-8"))
+HERE = Path(__file__).resolve().parent
+with (HERE / "spec" / "scene_spec.json").open(encoding="utf-8") as fh:
+    spec = json.load(fh)
 REACH_R = 0.78          # Panda 实用工作半径(留操作余量),标称 0.855
 MIN_R = 0.15            # 太近会撞底盘
 
