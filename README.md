@@ -9,6 +9,18 @@ physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
 </p>
 <p align="center"><sub>Left: put the red cube in the box · Right: flip open the hinged lid</sub></p>
 
+## The skill
+
+[`skills/agentic-sim2data/`](skills/agentic-sim2data/SKILL.md) packages the
+entire workflow as a reusable agent skill: pipeline stages, validation gates,
+acceptance criteria, and a pitfalls reference — every entry a real bug from
+these builds. Drop it into `~/.agents/skills/` and the agent can rerun the
+whole methodology on a new scene or task.
+
+One command reruns the whole methodology on this task:
+`cd pipeline && python run_pipeline.py` — headless-safe, no GUI needed.
+
+
 ## Tasks
 
 | Task | Instruction | Joint type | |
@@ -21,22 +33,24 @@ physically validated MuJoCo scenes and LIBERO-style demonstration datasets.**
 *Single-episode tasks are preview builds — the policies and validation gates
 are complete, dataset scaling is in progress.*
 
+
 ## Pipeline
+
+Every arrow is a **validation gate** — a failed gate blocks the pipeline,
+forces a design fix in the scene IR, then everything reruns.
 
 ```mermaid
 graph LR
-    A[scene_spec.json<br/>scene IR] --> B[MJCF compile]
-    B --> C[Physics self-check<br/>settle · penetration · rest]
-    A --> D[Reachability pre-check<br/>task objects within arm reach]
-    C --> E[robosuite task<br/>arm + placements + success]
+    A["📄 scene_spec.json<br/>scene IR"] --> B["⚙️ MJCF compile"]
+    B --> C{"✅ Physics<br/>self-check"}
+    A --> D{"🎯 Reachability<br/>pre-check"}
+    C --> E["🤖 robosuite task<br/>Panda + placements"]
     D --> E
-    E --> F[IK expert<br/>mink + joint-position control]
-    F --> G[Penetration audit<br/>per-pair contact depth]
-    G --> H[HDF5 dataset<br/>LIBERO/robosuite schema]
+    E --> F["🦾 IK expert<br/>mink + joint control"]
+    F --> G{"✅ Penetration<br/>audit"}
+    G --> H["📦 HDF5 dataset<br/>6/6 episodes success"]
 ```
 
-Every arrow is a **validation gate**. A failed gate blocks the pipeline and
-forces a design fix in the scene IR — then everything reruns.
 
 ## Defects caught by validation gates
 
@@ -52,6 +66,7 @@ by a full pipeline rerun:
 | 5 | Top-down camera render | transparent box invisible against checkerboard (color collision) | orange translucent walls + bold rim outline |
 | 6 | Penetration audit | distractor ball smashed 19.6 mm through the floor during settle | distractor made static |
 | 7 | Camera composition | featureless white table read as a wall — scene looked upside down | near-vertical top-down camera + checkerboard table texture |
+
 
 ## Dataset
 
@@ -71,28 +86,6 @@ data/demo_i
 Top-level attrs embed the full scene-spec IR — every episode is independently
 reconstructible.
 
-## The skill
-
-[`skills/agentic-sim2data/`](skills/agentic-sim2data/SKILL.md) packages the
-entire workflow as a reusable agent skill: pipeline stages, validation gates,
-acceptance criteria, and a pitfalls reference — every entry a real bug from
-these builds. Drop it into `~/.agents/skills/` and the agent can rerun the
-whole methodology on a new scene or task.
-
-## Run a task yourself
-
-```bash
-cd tasks/bottle_tray/mujoco_env   # or any other task
-python run_pipeline.py
-```
-
-Requires: Python 3.12, `pip install mujoco robosuite robosuite-models mink
-h5py imageio`. Headless-safe (offscreen rendering, no GUI needed).
-
-Interactive Blender previews (where present) live next to each task, e.g.
-[`projects/blender_scene`](projects/blender_scene) for the original lab and
-`tasks/*/build_scene*.py` for the rest.
-
 ## Repository map
 
 ```text
@@ -109,4 +102,3 @@ Interactive Blender previews (where present) live next to each task, e.g.
 ├── images/                          demo GIFs & frames
 └── docs/                            PIPELINE.md · ITERATION_LOG.md
 ```
-
