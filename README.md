@@ -5,11 +5,21 @@ physically validated MuJoCo scenes and LIBERO-compatible demonstration
 datasets.**
 
 <p align="center">
-  <img src="images/grasp_demo.gif" width="32%" alt="Put the red cube in the box">
-  <img src="images/lid_open.gif" width="32%" alt="Flip open the hinged lid">
-  <img src="images/two_tier_sort.gif" width="32%" alt="Two-tier sort: open lid, pull drawer, sort cubes, close">
+<table>
+  <tr>
+    <td align="center">
+      <img src="images/grasp_demo.gif" width="430"><br>
+      <sub>Put the red cube in the box</sub>
+    </td>
+    <td align="center">
+      <img src="images/lid_open.gif" width="430"><br>
+      <sub>Flip open the hinged lid</sub><br>
+      <img src="images/two_tier_sort.gif" width="430"><br>
+      <sub>Two-tier sort (open lid → pull drawer → sort cubes → close)</sub>
+    </td>
+  </tr>
+</table>
 </p>
-<p align="center"><sub>Put the red cube in the box · Flip open the hinged lid · Two-tier sort (open lid → pull drawer → sort cubes → close)</sub></p>
 
 ## The skill
 
