@@ -60,7 +60,7 @@ def run_one(env, ex, ren, cams, record_video):
         frames["robot0_joint_pos"].append(np.array(o["robot0_joint_pos"]))
         frames["robot0_gripper_qpos"].append(np.array(o["robot0_gripper_qpos"]))
         frames["lid_qpos"].append(np.array(env.lid_angle()))
-        frames["states"].append(np.array(env.sim.get_state().flatten(), dtype=float))
+        frames["states"].append(_np.concatenate([_np.asarray(env.sim.get_state().qpos, dtype=float), _np.asarray(env.sim.get_state().qvel, dtype=float)]))
         frames["dones"].append(False)
         if record_video:
             a = R.render_snapshot(ren, env, cams["agentview"])
@@ -233,10 +233,15 @@ def main():
                       "robot0_joint_pos", "robot0_gripper_qpos", "lid_qpos"):
                 obs_g.create_dataset(k, data=ep["data"][k],
                                      compression="gzip")
+            if "states" in ep["data"]:
+                g.create_dataset("states", data=ep["data"]["states"],
+                                 compression="gzip")
             g.create_dataset("dones", data=ep["data"]["dones"].astype(np.uint8))
             meta = g.create_group("env_args")
             meta.attrs["env_name"] = "OpenBoxLid"
             meta.attrs["spec_json"] = json.dumps(spec)
+            if hasattr(env, 'model') and hasattr(env.model, 'get_xml'):
+                g.attrs["model_file"] = env.model.get_xml()
 
     print("WROTE %s (%d episodes, raw success %d/%d attempts)"
           % (args.out, len(episodes), wins, attempts))
