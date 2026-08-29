@@ -1,10 +1,13 @@
 # GLM-5.3-Flash Skills · Embodied Data Engine
 
 <p align="center">
-  <img src="images/grasp_demo.gif" width="49%" alt="Put the red cube in the box">
-  
-  <img src="images/lid_open.gif" width="49%" alt="Flip open the hinged lid">
-  <img src="images/bottle_tray.gif" width="49%" alt="Put the green bottle in the tray">
+<table cellpadding="0" cellspacing="0"><tr>
+  <td valign="top"><img src="images/bottle_tray.gif" width="420"></td>
+  <td valign="top">
+    <img src="images/lid_open.gif" width="420"><br>
+    <img src="images/two_tier_sort.gif" width="420">
+  </td>
+</tr></table>
 </p>
 
 **One agent skill that turns natural language into physically validated robot manipulation datasets — autonomously.**
