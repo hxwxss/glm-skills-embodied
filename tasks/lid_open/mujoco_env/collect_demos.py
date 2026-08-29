@@ -49,7 +49,7 @@ def run_one(env, ex, ren, cams, record_video):
     ex.rebind(env)
     frames = {"actions": [], "agentview_image": [], "robot0_eef_pos": [],
               "robot0_eef_quat": [], "robot0_joint_pos": [],
-              "robot0_gripper_qpos": [], "lid_qpos": [], "dones": []}
+              "robot0_gripper_qpos": [], "lid_qpos": [], "states": [], "dones": []}
     vid = []
 
     def hook(jstep, o, action):
@@ -60,6 +60,7 @@ def run_one(env, ex, ren, cams, record_video):
         frames["robot0_joint_pos"].append(np.array(o["robot0_joint_pos"]))
         frames["robot0_gripper_qpos"].append(np.array(o["robot0_gripper_qpos"]))
         frames["lid_qpos"].append(np.array(env.lid_angle()))
+        frames["states"].append(np.array(env.sim.get_state().flatten(), dtype=float))
         frames["dones"].append(False)
         if record_video:
             a = R.render_snapshot(ren, env, cams["agentview"])

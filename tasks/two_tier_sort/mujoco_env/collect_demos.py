@@ -63,7 +63,7 @@ def run_one(env, ex, ren, obs_ren, cams, record_video):
 
     frames = {"actions": [], "agentview_image": [], "robot0_eef_pos": [],
               "robot0_eef_quat": [], "robot0_joint_pos": [],
-              "robot0_gripper_qpos": [], "lid_qpos": [], "drawer_qpos": [],
+              "robot0_gripper_qpos": [], "states": [], "lid_qpos": [], "drawer_qpos": [],
               "red_cube_pos": [], "blue_cube_pos": [], "dones": []}
     vid = []
 
@@ -73,6 +73,7 @@ def run_one(env, ex, ren, obs_ren, cams, record_video):
         frames["robot0_eef_pos"].append(np.array(o["robot0_eef_pos"]))
         frames["robot0_eef_quat"].append(np.array(o["robot0_eef_quat"]))
         frames["robot0_joint_pos"].append(np.array(o["robot0_joint_pos"]))
+        frames["states"].append(np.array(env.sim.get_state().flatten(), dtype=float))
         frames["robot0_gripper_qpos"].append(
             np.array(o["robot0_gripper_qpos"]))
         frames["lid_qpos"].append(np.array(env.lid_angle()))
