@@ -1,6 +1,10 @@
 # GLM-5.3-Flash Skills · Embodied Data Engine
 
 <p align="center">
+  <img src="images/banner.png" width="100%">
+</p>
+
+<p align="center">
 <table cellpadding="0" cellspacing="0"><tr>
   <td valign="top"><img src="images/bottle_tray.gif" width="420"></td>
   <td valign="top">
