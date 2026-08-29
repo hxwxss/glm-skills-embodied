@@ -73,7 +73,7 @@ def run_one(env, ex, ren, obs_ren, cams, record_video):
         frames["robot0_eef_pos"].append(np.array(o["robot0_eef_pos"]))
         frames["robot0_eef_quat"].append(np.array(o["robot0_eef_quat"]))
         frames["robot0_joint_pos"].append(np.array(o["robot0_joint_pos"]))
-        frames["states"].append(_np.concatenate([_np.asarray(env.sim.get_state().qpos, dtype=float), _np.asarray(env.sim.get_state().qvel, dtype=float)]))
+        frames["states"].append(np.concatenate([np.asarray(env.sim.get_state().qpos, dtype=float), np.asarray(env.sim.get_state().qvel, dtype=float)]))
         frames["robot0_gripper_qpos"].append(
             np.array(o["robot0_gripper_qpos"]))
         frames["lid_qpos"].append(np.array(env.lid_angle()))
@@ -222,7 +222,12 @@ def main():
                       "drawer_qpos", "red_cube_pos", "blue_cube_pos"):
                 obs_g.create_dataset(k, data=ep["data"][k],
                                      compression="gzip")
+            if "states" in ep["data"]:
+                g.create_dataset("states", data=ep["data"]["states"],
+                                 compression="gzip")
             g.create_dataset("dones", data=ep["data"]["dones"].astype(np.uint8))
+            g.attrs["model_file"] = env.model.get_xml()
+            g.attrs["env_args"] = json.dumps({"env_name": "TwoTierSort", "control_freq": 20})
             meta = g.create_group("env_args")
             meta.attrs["env_name"] = "TwoTierSort"
             meta.attrs["spec_json"] = json.dumps(spec)
