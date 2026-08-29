@@ -1,7 +1,9 @@
 # GLM-5.3-Flash Skills · Embodied Data Engine
 
 <p align="center">
-  <img src="images/banner.png" width="100%">
+  <img src="images/grasp_demo.gif" width="32%">  
+  <img src="images/bottle_tray.gif" width="32%">  
+  <img src="images/two_tier_sort.gif" width="32%">
 </p>
 
 **One agent skill that turns natural language into physically validated robot manipulation datasets — autonomously.**
