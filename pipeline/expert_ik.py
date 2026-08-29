@@ -227,7 +227,7 @@ class IKExpert:
                     if np.all(np.abs(q_arm - qa) < 0.06):
                         break
                     a = np.zeros(env.action_dim)
-                    a[:7] = qa + np.clip(q_arm - qa, -0.25, 0.25)
+                    a[:7] = qa + np.clip(q_arm - qa, -0.9, 0.9)
                     a[7] = float(wp["gripper"])
                     obs, _, done, _ = env.step(a)
                     jsteps += 1

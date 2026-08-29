@@ -1,118 +1,95 @@
-# GLM Embodied Data Skills
-
-**One coding-agent skill that turns natural-language manipulation tasks into
-physically validated MuJoCo scenes and LIBERO-compatible demonstration
-datasets.**
+# GLM-5.3-Flash Skills · Embodied Data Engine
 
 <p align="center">
-<table>
-  <tr>
-    <td align="center">
-      <img src="images/grasp_demo.gif" width="430"><br>
-      <sub>Put the red cube in the box</sub>
-    </td>
-    <td align="center">
-      <img src="images/lid_open.gif" width="430"><br>
-      <sub>Flip open the hinged lid</sub><br>
-      <img src="images/two_tier_sort.gif" width="430"><br>
-      <sub>Two-tier sort (open lid → pull drawer → sort cubes → close)</sub>
-    </td>
-  </tr>
-</table>
+  <img src="images/banner.png" width="100%">
 </p>
 
-## The skill
+**One agent skill that turns natural language into physically validated robot manipulation datasets — autonomously.**
 
-[`skills/agentic-sim2data/`](skills/agentic-sim2data/SKILL.md) packages the
-entire workflow as a reusable agent skill: pipeline stages, validation gates,
-acceptance criteria, and a pitfalls reference — every entry a real bug from
-these builds. Drop it into `~/.agents/skills/` and the agent can rerun the
-whole methodology on a new scene or task.
+GLM-5.3-Flash designs the scene, compiles it to MuJoCo, passes four validation gates, writes its own IK expert, and collects a LIBERO-compatible HDF5 dataset. No hand-fixes.
 
-One command reruns the whole methodology on this task:
-`cd pipeline && python run_pipeline.py` — headless-safe, no GUI needed.
+## ⚡ Quick Start
 
+```bash
+git clone https://github.com/hxwxss/glm-skills-embodied.git
+cd glm-skills-embodied
+pip install -r requirements.txt
 
-## Tasks
-
-| Task | Instruction | Joint type | |
-|---|---|---|---|
-| [`pipeline/` put-red-in-box](pipeline/) | put the red cube into the transparent storage box | — (free objects) | ![put in box](images/grasp_demo.gif) |
-| [`tasks/bottle_tray`](tasks/bottle_tray/) | put the green bottle in the tray | — (novel objects: bottle + tray) | ![bottle in tray](images/bottle_tray.gif) |
-| [`tasks/lid_open`](tasks/lid_open/) | flip open the lid of the storage box and leave it open | **revolute hinge** | ![lid open](images/lid_open.gif) |
-| [`tasks/two_tier_sort`](tasks/two_tier_sort/) | open the lid, pull out the drawer, put the red cube in the upper compartment and the blue cube in the drawer, then close the drawer and the lid again | **revolute + prismatic, long-horizon** | ![two tier sort](images/two_tier_sort.gif) |
-
-*`lid_open` and `two_tier_sort` are preview builds — validation gates and
-policies are complete; dataset scaling and long-horizon tuning are in
-progress (the two-tier expert now records every motion phase after the
-contact-callback fix).*
-
-
-## Pipeline
-
-Every arrow is a **validation gate** — a failed gate blocks the pipeline,
-forces a design fix in the scene IR, then everything reruns.
-
-```mermaid
-graph LR
-    A["📄 scene_spec.json<br/>scene IR"] --> B["⚙️ MJCF compile"]
-    B --> C{"✅ Physics<br/>self-check"}
-    A --> D{"🎯 Reachability<br/>pre-check"}
-    C --> E["🤖 robosuite task<br/>Panda + placements"]
-    D --> E
-    E --> F["🦾 IK expert<br/>mink + joint control"]
-    F --> G{"✅ Penetration<br/>audit"}
-    G --> H["📦 HDF5 dataset<br/>6/6 episodes success"]
+# Full pipeline: scene IR → validate → grasp → collect dataset
+python tasks/put_red_in_box/mujoco_env/run_pipeline.py --episodes 3
 ```
 
+Requires Python 3.12. Headless-safe, no GUI needed.
 
-## Defects caught by validation gates
+Interactive Blender scene: open `pipeline/blender/embodied_lab.blend`, run `interaction.py` from the Scripting tab, press `N` → **Embodied Demo** panel.
 
-Defects found by automated validation gates, fixed in the scene IR, followed
-by a full pipeline rerun:
+## 🎬 Demos
 
-| # | Found by | Defect | Fix |
-|---|---|---|---|
-| 1 | Gripper-aperture check | 7 cm cube > 5.9 cm measured gripper aperture — physically ungraspable | cube resized |
-| 2 | Reachability pre-check | all objects 1.57 m from base (arm reach 0.855 m) | task zone re-laid out |
-| 3 | Action-range inspection | env silently clipped actions to ±1 — joint angles & world targets truncated | controller ranges opened to physical units |
-| 4 | Gripper telemetry | fingers never closed: gripper command written to wrong action dim (6 instead of 7) | index fixed |
-| 5 | Top-down camera render | transparent box invisible against checkerboard (color collision) | orange translucent walls + bold rim outline |
-| 6 | Penetration audit | distractor ball smashed 19.6 mm through the floor during settle | distractor made static |
-| 7 | Camera composition | featureless white table read as a wall — scene looked upside down | near-vertical top-down camera + checkerboard table texture |
+| Task | Success | |
+|---|---|---|
+| **Put red cube in box** (reference) | 6/6 | ![put in box](images/grasp_demo.gif) |
+| **Green bottle in tray** | 8/8 | ![bottle in tray](images/bottle_tray.gif) |
+| **Flip open the hinged lid** | 1/1 | ![lid open](images/lid_open.gif) |
+| **Two-tier sort** (lid + drawer + sort) | 1/1 | ![two tier](images/two_tier_sort.gif) |
 
+▶ Full-quality videos in [`videos/`](videos/)
 
-## Dataset & requirements
+## 📊 Dataset
 
-Every task ships its own HDF5 in LIBERO/robosuite-compatible schema
-(see [`data/demo.hdf5`](data/demo.hdf5)):
+Every task ships a LIBERO-compatible HDF5 under [`data/`](data/):
 
 ```text
-data/demo_i
-├─ attrs: num_samples, success, instruction
-├─ actions            (T, action_dim)
+data/put_red_in_box/demo.hdf5
+├─ attrs: instruction, model_file (full MJCF), env_args, success_rate
+├─ actions       (T, 8)
 ├─ obs/
-│  ├─ agentview_image (T, H, W, 3)
+│  ├─ agentview_image  (T, 480, 640, 3)
 │  ├─ robot0_eef_pos / quat / joint_pos / gripper_qpos
-└─ dones              (T,)
+├─ states        (T, nq + nv)      ← full sim state, frame-accurate replay
+└─ dones         (T,)
 ```
 
-Top-level attrs embed the full scene-spec IR — every episode is independently
-reconstructible.
+Verified by [`pipeline/verify_libero_compat.py`](pipeline/verify_libero_compat.py):
+`model_file` compiles · `states` replay reproduces EE pose < 1 mm · `env_args` rebuilds via `robosuite.make` · terminal `dones=True`.
 
-## Repository map
+## 🧠 The Skill
+
+[`skills/agentic-sim2data/SKILL.md`](skills/agentic-sim2data/SKILL.md) packages the
+entire workflow as a reusable agent skill: pipeline stages, validation gates,
+acceptance criteria, and a 26-entry pitfalls reference — every entry a real bug
+from these builds.
+
+Drop it into `~/.agents/skills/` and the agent can rerun the whole methodology
+on any new scene or task.
+
+## 📁 Repository
 
 ```text
-├── skills/agentic-sim2data/        ★ the skill (stages, gates, pitfalls)
-├── pipeline/                       put-red-in-box (reference task)
-│  ├── scene_spec.json              ★ scene IR
-│  └── run_pipeline.py · task · expert_ik · validators · collect
+├── skills/agentic-sim2data/        the skill (stages, gates, pitfalls)
 ├── tasks/
-│  ├── bottle_tray/                 bottle → tray (8 eps)
-│  ├── lid_open/                    revolute lid flip (preview)
-│  └── two_tier_sort/               hinged lid + drawer long-horizon (preview)
-├── videos/                          full-quality MP4 recordings
-├── data/demo.hdf5                   reference-task dataset
-├── images/                          demo GIFs & frames
-└── docs/                            PIPELINE.md · ITERATION_LOG.md
+│  ├── put_red_in_box/mujoco_env/   reference task (run_pipeline.py)
+│  ├── bottle_tray/                  bottle → tray (8 episodes)
+│  ├── lid_open/                     revolute lid flip (preview)
+│  └── two_tier_sort/                hinged lid + drawer (preview)
+├── videos/                          MP4 recordings
+├── data/                            per-task HDF5 datasets
+├── images/                          GIFs, frames, banner
+└── docs/
+   ├── PIPELINE.md                   architecture & stage details
+   ├── VALIDATION.md                 all defects caught by gates
+   └── ITERATION_LOG.md              full debug history
 ```
+
+## 📖 More
+
+- [Pipeline architecture](docs/PIPELINE.md)
+- [Validation gates — 26 defects found and fixed autonomously](docs/VALIDATION.md)
+- [Full iteration log](docs/ITERATION_LOG.md)
+- [Scene provenance](docs/PIPELINE.md#scene-provenance) — the MuJoCo scene was
+  first prototyped in Blender, then exported as an IR and re-compiled
+
+## 🔧 Requirements
+
+Python 3.12 · MuJoCo 3.4 · robosuite 1.5.2 · mink · h5py · imageio
+
+Headless-safe (offscreen rendering, no display required).
