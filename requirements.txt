@@ -1,4 +1,4 @@
-# Python 3.12; MuJoCo pipeline (headless-safe)
+# Python 3.12, verified on Windows 11 + NVIDIA RTX
 mujoco==3.4.0
 robosuite==1.5.2
 robosuite-models==1.0.0
@@ -8,3 +8,4 @@ imageio
 numpy<3
 opencv-python
 Pillow
+quadprog
