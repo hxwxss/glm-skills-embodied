@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="images/grasp_demo.gif" width="49%" alt="Put the red cube in the box">
-  <img src="images/two_tier_sort.gif" width="49%" alt="Two-tier sort: open lid, pull drawer, sort cubes, close"><br>
+  
   <img src="images/lid_open.gif" width="49%" alt="Flip open the hinged lid">
   <img src="images/bottle_tray.gif" width="49%" alt="Put the green bottle in the tray">
 </p>
@@ -33,7 +33,6 @@ Interactive Blender scene: open `pipeline/blender/embodied_lab.blend`, run `inte
 | **Put red cube in box** (reference) | 6/6 | ![put in box](images/grasp_demo.gif) |
 | **Green bottle in tray** | 8/8 | ![bottle in tray](images/bottle_tray.gif) |
 | **Flip open the hinged lid** | 1/1 | ![lid open](images/lid_open.gif) |
-| **Two-tier sort** (lid + drawer + sort) | 1/1 | ![two tier](images/two_tier_sort.gif) |
 
 ▶ Full-quality videos in [`videos/`](videos/)
 
@@ -73,7 +72,6 @@ on any new scene or task.
 │  ├── put_red_in_box/mujoco_env/   reference task (run_pipeline.py)
 │  ├── bottle_tray/                  bottle → tray (8 episodes)
 │  ├── lid_open/                     revolute lid flip (preview)
-│  └── two_tier_sort/                hinged lid + drawer (preview)
 ├── videos/                          MP4 recordings
 ├── data/                            per-task HDF5 datasets
 ├── images/                          GIFs, frames, banner
