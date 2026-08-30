@@ -156,16 +156,69 @@ Write HDF5 directly:
 
 ```text
 data/demo_i/
-  attrs: num_samples, success, instruction, model xml
+  attrs: num_samples, success, instruction, model_file (full MJCF), env_args (JSON)
   actions   (T, action_dim)
+  states    (T, nq + nv)
   obs/agentview_image (T,H,W,3), robot0_eef_pos/quat, robot0_joint_pos, ...
-  dones     (T,)
+  dones     (T,)  ← last frame MUST be True
 ```
 
 Render observations with `mujoco.Renderer` bound to the **live** model — not
 through any wrapper that may hold a stale model. Read the file back after
 writing and verify shapes and a mid-episode frame. Record one MP4 demo for
 human review.
+
+### M4.5 Standard Output Specification
+
+Every task must produce ALL of the following artifacts. A missing or invalid
+artifact blocks release. Detailed schema: `docs/OUTPUT_SPEC.md`.
+
+| Artifact | Path | Format | Gate |
+|---|---|---|---|
+| Scene IR | `spec/scene_spec.json` | JSON (versioned schema) | all required fields present |
+| Dataset | `data/<task>/demo.hdf5` | HDF5 (LIBERO drop-in) | states + model_file + env_args + terminal dones |
+| Demo video | `rollouts/<task>_demo.mp4` | MP4 (H.264) | 640×480 @ 20fps minimum |
+| Demo GIF | `images/<task>.gif` | GIF | 420px wide, auto-loop, ≤ 5 MB |
+| Validation report | `docs/validation_<task>.json` | JSON | all gates pass, structured output |
+
+HDF5 per-episode required fields:
+
+| Field | Shape / Type | Notes |
+|---|---|---|
+| `actions` | (T, action_dim) float64 | action_dim depends on controller; document semantics |
+| `states` | (T, nq + nv) float64 | full sim state, frame-accurate replay |
+| `dones` | (T,) uint8 | last frame MUST be True |
+| `obs/agentview_image` | (T, 480, 640, 3) uint8 | minimum resolution; higher OK |
+| `obs/robot0_eef_pos` | (T, 3) float64 | |
+| `obs/robot0_eef_quat` | (T, 4) float64 | (w,x,y,z) |
+| `obs/robot0_joint_pos` | (T, 7) float64 | |
+| `obs/robot0_gripper_qpos` | (T, 2) float64 | |
+| attrs `model_file` | MJCF string | full env, compiles via `mujoco.MjModel.from_xml_string` |
+| attrs `env_args` | JSON dict | must include `env_name`, `env_kwargs.robots`, `env_kwargs.controller_configs`, `env_kwargs.base_pos` |
+
+Action semantics MUST be declared: `absolute_joint_position` (8-dim) or
+`osc_delta` (7-dim). Never mix the two in one dataset.
+
+Dataset size classes:
+
+| Class | Criteria | Example |
+|---|---|---|
+| validated | ≥ 3 episodes, all success, states + model_file + env_args present, schema verified | `put_red_in_box` (6 eps) |
+| preview | Gates pass but < 3 episodes OR states missing | `lid_open` (1 ep) |
+| wip | Any gate fails or code incomplete | — |
+
+### M4.5 LIBERO Drop-in Checklist
+
+For the dataset to be loadable by official LIBERO scripts (not just "similar"):
+
+1. `model_file` attr: full MJCF string from `env.model.get_xml()` after reset;
+2. `states` (T, nq+nv): full sim state per step, replay = write qpos/qvel into
+   `MjData` + `mj_forward`, must reproduce recorded EE pose to < 1 mm;
+3. `env_args` attr: JSON with `env_name` (registered in REGISTERED_ENVS),
+   `env_kwargs` exactly as passed to the constructor (composite config captured
+   *before* reset — the post-reset normalized dict has internal keys);
+4. `dones[-1] = True` forced;
+5. action semantics documented: absolute joint-position vs OSC delta.
 
 ## Reference implementation
 
