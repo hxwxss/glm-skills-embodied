@@ -118,6 +118,20 @@ Verify end-state geometry (object inside container, not intersecting walls).
 Keep a whitelist for legitimate resting/grasp contacts. This stage routinely
 finds real defects — treat every failure as a design fix, not noise.
 
+### M4 Standard Outputs (see docs/OUTPUT_SPEC.md for full spec)
+
+Every task must produce ALL of the following upon completion:
+
+| Artifact | Path | Gate |
+|---|---|---|
+| Scene IR | `spec/scene_spec.json` | schema valid |
+| Dataset | `data/<task>/demo.hdf5` | states + model_file + env_args present, terminal done=True |
+| Demo video | `rollouts/<task>_demo.mp4` | 640×480 @ 20fps |
+| Demo GIF | `images/<task>.gif` | 420px wide, auto-loop |
+| Validation report | `docs/validation_<task>.json` | all gates pass |
+
+A missing or invalid artifact blocks release. See `docs/OUTPUT_SPEC.md` for exact schema.
+
 ### M4 Dataset (LIBERO drop-in schema)
 
 Write HDF5 directly. For the dataset to be **drop-in loadable by the official
